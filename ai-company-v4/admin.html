@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NOVA AI — 后台管理系统</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --f:-apple-system,"SF Pro Display","Helvetica Neue",sans-serif;
+  --bg:#0a0a0f;--s1:#111118;--s2:#18181f;--s3:#1e1e28;
+  --fg:#f5f5f7;--gray:#86868b;--gray2:#3a3a42;
+  --blue:#0071e3;--cyan:#32ade6;--purple:#bf5af2;
+  --green:#30d158;--orange:#ff9f0a;--red:#ff453a;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.05);
+  --grad:linear-gradient(135deg,#0071e3,#bf5af2);
+  --sb:220px;
+}
+html{font-size:14px;height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f);-webkit-font-smoothing:antialiased;height:100%;overflow:hidden}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;background:none;font-family:var(--f);color:inherit;font-size:13px}
+input,select,textarea{font-family:var(--f);font-size:13px;color:var(--fg)}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* ══════════ LAYOUT ══════════ */
+.app{display:grid;grid-template-columns:var(--sb) 1fr;grid-template-rows:52px 1fr;height:100vh}
+
+/* ══════════ TOPBAR ══════════ */
+.topbar{
+  grid-column:1/-1;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;z-index:200;
+  background:rgba(10,10,15,.9);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.tb-l{display:flex;align-items:center;gap:14px}
+.tb-logo{display:flex;align-items:center;gap:9px}
+.tb-mark{width:28px;height:28px;border-radius:7px;background:var(--grad);display:grid;place-items:center;font-size:12px;font-weight:900;color:#fff;box-shadow:0 0 18px rgba(0,113,227,.4)}
+.tb-name{font-size:14px;font-weight:700;letter-spacing:-.3px}
+.tb-badge{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(0,113,227,.2);border:1px solid rgba(0,113,227,.3);color:rgba(100,165,250,.9);font-weight:600;letter-spacing:.5px}
+.tb-search{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;width:220px;transition:border-color .2s}
+.tb-search:focus-within{border-color:rgba(0,113,227,.45)}
+.tb-search input{background:none;border:none;outline:none;font-size:13px;color:var(--fg);width:100%}
+.tb-search input::placeholder{color:var(--gray2)}
+.tb-r{display:flex;align-items:center;gap:10px}
+.tb-ico{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:var(--s2);border:1px solid var(--border);transition:background .15s;position:relative}
+.tb-ico:hover{background:var(--s3)}
+.tb-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg)}
+.tb-av{width:30px;height:30px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-size:12px;cursor:pointer}
+.tb-user{line-height:1.3}
+.tb-uname{font-size:13px;font-weight:600}
+.tb-urole{font-size:11px;color:var(--gray)}
+/* DB status pill */
+.db-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+.db-dot{width:6px;height:6px;border-radius:50%;background:var(--gray);animation:none}
+.db-dot.ok{background:var(--green);animation:pulse2 2s ease-in-out infinite}
+.db-dot.err{background:var(--red)}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(48,209,88,.4)}50%{box-shadow:0 0 0 4px rgba(48,209,88,0)}}
+
+/* ══════════ SIDEBAR ══════════ */
+.sidebar{
+  background:var(--s1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:14px 10px;gap:2px;
+  overflow-y:auto;
+}
+.sb-sec{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gray2);padding:14px 10px 6px;margin-top:4px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:13px;color:rgba(245,245,247,.5);cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
+.sb-item:hover{background:var(--s2);color:rgba(245,245,247,.85)}
+.sb-item.on{background:rgba(0,113,227,.15);color:#60a5fa;font-weight:500}
+.sb-ico{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sb-cnt{margin-left:auto;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(0,113,227,.2);color:#60a5fa}
+.sb-cnt.red{background:rgba(255,69,58,.2);color:var(--red)}
+.sb-sep{height:1px;background:var(--border2);margin:8px 0}
+.sb-bot{margin-top:auto;padding-top:12px;border-top:1px solid var(--border2)}
+
+/* ══════════ MAIN ══════════ */
+.main{overflow-y:auto;display:flex;flex-direction:column}
+.page{display:none;flex-direction:column;gap:18px;padding:22px;animation:fadeIn .2s ease}
+.page.on{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ══════════ COMPONENTS ══════════ */
+/* Page header */
+.ph{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.ph h1{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.ph p{font-size:13px;color:var(--gray);margin-top:3px}
+.ph-r{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:filter .15s,transform .1s}
+.btn:hover{filter:brightness(1.1)}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--blue);color:#fff;box-shadow:0 2px 12px rgba(0,113,227,.3)}
+.btn-g{background:var(--s2);border:1px solid var(--border);color:var(--fg)}
+.btn-d{background:rgba(255,69,58,.12);border:1px solid rgba(255,69,58,.22);color:var(--red)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:5px 10px;font-size:11px;border-radius:6px}
+
+/* Card */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border2)}
+.card-title{font-size:14px;font-weight:600}
+.card-bd{padding:18px}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:13px;padding:16px 18px;transition:border-color .2s}
+.kpi:hover{border-color:rgba(255,255,255,.14)}
+.kpi-lbl{font-size:11px;color:var(--gray);letter-spacing:.3px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}
+.kpi-val{font-size:24px;font-weight:700;letter-spacing:-1.2px;line-height:1}
+.kpi-delta{display:inline-flex;align-items:center;gap:3px;margin-top:7px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px}
+.up{background:rgba(48,209,88,.1);color:var(--green)}
+.dn{background:rgba(255,69,58,.1);color:var(--red)}
+
+/* Table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);padding:10px 14px;border-bottom:1px solid var(--border2);text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border2);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+td{padding:11px 14px;font-size:13px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px}
+.b-green{background:rgba(48,209,88,.1);border:1px solid rgba(48,209,88,.2);color:var(--green)}
+.b-orange{background:rgba(255,159,10,.1);border:1px solid rgba(255,159,10,.2);color:var(--orange)}
+.b-gray{background:rgba(134,134,139,.1);border:1px solid rgba(134,134,139,.2);color:var(--gray)}
+.b-blue{background:rgba(0,113,227,.1);border:1px solid rgba(0,113,227,.2);color:#60a5fa}
+.b-purple{background:rgba(191,90,242,.1);border:1px solid rgba(191,90,242,.2);color:var(--purple)}
+.b-red{background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.2);color:var(--red)}
+
+/* Action buttons */
+.acts{display:flex;gap:5px}
+.act{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-size:13px;background:var(--s2);border:1px solid var(--border);transition:background .12s;cursor:pointer}
+.act:hover{background:var(--s3)}
+
+/* Filters bar */
+.fbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border2)}
+.finput{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;outline:none;color:var(--fg);min-width:180px;transition:border-color .2s}
+.finput:focus{border-color:rgba(0,113,227,.45)}
+.fsel{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;outline:none;color:var(--fg);cursor:pointer}
+.fsel option{background:var(--s2)}
+
+/* Pagination */
+.pag{display:flex;align-items:center;gap:5px;padding:12px 18px;border-top:1px solid var(--border2)}
+.pg{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-size:12px;background:var(--s2);border:1px solid var(--border);cursor:pointer;transition:background .12s}
+.pg:hover{background:var(--s3)}
+.pg.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.pg-info{margin-left:auto;font-size:12px;color:var(--gray)}
+
+/* ══════════ MODAL ══════════ */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:900;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.mbg.on{display:flex}
+.mbox{background:var(--s1);border:1px solid var(--border);border-radius:18px;width:min(560px,94vw);max-height:90vh;overflow-y:auto;animation:mIn .2s ease}
+@keyframes mIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border2)}
+.mtitle{font-size:15px;font-weight:600}
+.mclose{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-size:16px;background:var(--s2);border:1px solid var(--border);cursor:pointer;color:var(--gray);transition:background .12s}
+.mclose:hover{background:var(--s3);color:var(--fg)}
+.mbd{padding:20px}
+.mft{padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:flex-end;gap:9px}
+
+/* Form */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ff{display:flex;flex-direction:column;gap:5px}
+.ff.full{grid-column:1/-1}
+.ff label{font-size:12px;font-weight:500;color:rgba(245,245,247,.65)}
+.ff input,.ff select,.ff textarea{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;outline:none;transition:border-color .2s;color:var(--fg)}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:rgba(0,113,227,.5);box-shadow:0 0 0 3px rgba(0,113,227,.08)}
+.ff input::placeholder,.ff textarea::placeholder{color:var(--gray2)}
+.ff select option{background:var(--s2)}
+.ff textarea{resize:vertical;min-height:80px;line-height:1.55}
+
+/* ══════════ TOAST ══════════ */
+#toasts{position:fixed;bottom:22px;right:22px;z-index:999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:11px;background:var(--s1);border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,.4);font-size:13px;min-width:220px;pointer-events:auto;animation:tIn .22s ease}
+@keyframes tIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+.toast.ok{border-color:rgba(48,209,88,.25);background:rgba(48,209,88,.07)}
+.toast.er{border-color:rgba(255,69,58,.25);background:rgba(255,69,58,.07)}
+.toast.info{border-color:rgba(0,113,227,.25);background:rgba(0,113,227,.07)}
+
+/* ══════════ EMPTY STATE ══════════ */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 20px;gap:10px;color:var(--gray)}
+.empty-ico{font-size:40px;opacity:.4}
+.empty p{font-size:14px}
+
+/* ══════════ LOADING ══════════ */
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--gray)}
+.spin{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--blue);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══════════ CONFIRM BOX ══════════ */
+.cbg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.cbg.on{display:flex}
+.cbox{background:var(--s1);border:1px solid rgba(255,69,58,.25);border-radius:16px;width:min(380px,92vw);padding:24px;text-align:center;animation:mIn .2s ease}
+.cbox h3{font-size:16px;font-weight:700;margin-bottom:8px}
+.cbox p{font-size:13px;color:var(--gray);margin-bottom:22px;line-height:1.6}
+.c-btns{display:flex;gap:10px;justify-content:center}
+
+/* ══════════ RESPONSIVE ══════════ */
+@media(max-width:860px){
+  :root{--sb:52px}
+  .sb-item span:not(.sb-ico){display:none}
+  .sb-sec,.sb-cnt{display:none}
+  .tb-search,.tb-user{display:none}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .fg{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ CONFIG BANNER (填入你的 Supabase 信息后会自动消失) ════════ -->
+<div id="config-banner" style="position:fixed;inset:0;z-index:9999;background:rgba(10,10,15,.97);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:36px 40px;width:min(480px,92vw);text-align:center">
+    <div style="width:48px;height:48px;border-radius:13px;background:var(--grad);display:grid;place-items:center;font-size:22px;margin:0 auto 16px">🔌</div>
+    <h2 style="font-size:18px;font-weight:700;letter-spacing:-.4px;margin-bottom:8px">连接 Supabase 数据库</h2>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:22px;line-height:1.65">填入你的 Supabase 项目 URL 和 anon key，点击连接后即可使用全部 CRUD 功能。</p>
+    <div style="display:flex;flex-direction:column;gap:10px;text-align:left">
+      <div class="ff"><label>Supabase Project URL</label><input id="cfg-url" type="text" placeholder="https://xxxx.supabase.co" style="font-size:12px;font-family:monospace"/></div>
+      <div class="ff"><label>Supabase Anon Key</label><input id="cfg-key" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." style="font-size:12px;font-family:monospace"/></div>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:18px;justify-content:center">
+      <button class="btn btn-p" style="width:100%;justify-content:center" onclick="connectDB()">🔗 连接数据库</button>
+    </div>
+    <p style="font-size:11px;color:var(--gray2);margin-top:12px">密钥仅存储在本地 sessionStorage，不会上传到任何服务器。</p>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none">
+
+  <!-- ── TOPBAR ── -->
+  <header class="topbar">
+    <div class="tb-l">
+      <div class="tb-logo">
+        <div class="tb-mark">N</div>
+        <span class="tb-name">NOVA AI</span>
+        <span class="tb-badge">ADMIN</span>
+      </div>
+      <div class="tb-search">
+        <span style="color:var(--gray);font-size:13px">🔍</span>
+        <input type="text" placeholder="搜索内容… (⌘K)" id="gsearch"/>
+      </div>
+    </div>
+    <div class="tb-r">
+      <div class="db-status" id="db-status">
+        <span class="db-dot" id="db-dot"></span>
+        <span id="db-label">连接中…</span>
+      </div>
+      <button class="tb-ico" onclick="refreshAll()" title="刷新">🔄</button>
+      <div class="tb-av">管</div>
+      <div class="tb-user">
+        <span class="tb-uname">管理员</span>
+        <span class="tb-urole">超级权限</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sb-sec">主要</div>
+    <div class="sb-item on" onclick="nav('overview')"><span class="sb-ico">📊</span><span>数据概览</span></div>
+
+    <div class="sb-sec">内容管理</div>
+    <div class="sb-item" onclick="nav('news')"><span class="sb-ico">📰</span><span>公司动态</span><span class="sb-cnt" id="news-cnt">—</span></div>
+    <div class="sb-item" onclick="nav('features')"><span class="sb-ico">✨</span><span>AI 功能</span><span class="sb-cnt" id="feat-cnt">—</span></div>
+
+    <div class="sb-sep"></div>
+    <div class="sb-bot">
+      <div class="sb-item" onclick="disconnectDB()"><span class="sb-ico">🔌</span><span>断开连接</span></div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- ════ OVERVIEW ════ -->
+    <div class="page on" id="page-overview">
+      <div class="ph">
+        <div><h1>数据概览</h1><p>company_news & ai_features 实时统计</p></div>
+        <div class="ph-r">
+          <button class="btn btn-g btn-sm" onclick="refreshAll()">🔄 刷新</button>
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-lbl"><span>公司动态总数</span><span>📰</span></div>
+          <div class="kpi-val" id="kpi-news" style="color:#60a5fa">—</div>
+          <div class="kpi-delta up" id="kpi-news-pub">已发布 —</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl"><span>AI 功能总数</span><span>✨</span></div>
+          <div class="kpi-val" id="kpi-feat" style="color:var(--purple)">—</div>
+          <div class="kpi-delta up" id="kpi-feat-active">已启用 —</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl"><span>草稿待发布</span><span>📝</span></div>
+          <div class="kpi-val" id="kpi-draft" style="color:var(--orange)">—</div>
+          <div class="kpi-delta b-orange" style="background:transparent;border:none">待处理</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl"><span>数据库状态</span><span>🔌</span></div>
+          <div class="kpi-val" id="kpi-db" style="color:var(--green);font-size:16px">连接中…</div>
+          <div class="kpi-delta up">Supabase</div>
+        </div>
+      </div>
+
+      <!-- Recent news -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">最新公司动态</span>
+          <button class="btn btn-p btn-sm" onclick="nav('news');openNewsModal()">＋ 新建</button>
+        </div>
+        <div id="ov-news-wrap">
+          <div class="loading"><div class="spin"></div>加载中…</div>
+        </div>
+      </div>
+
+      <!-- Recent features -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">最新 AI 功能</span>
+          <button class="btn btn-p btn-sm" onclick="nav('features');openFeatModal()">＋ 新建</button>
+        </div>
+        <div id="ov-feat-wrap">
+          <div class="loading"><div class="spin"></div>加载中…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ COMPANY NEWS ════ -->
+    <div class="page" id="page-news">
+      <div class="ph">
+        <div><h1>公司动态管理</h1><p>表：<code style="font-size:12px;color:var(--cyan)">company_news</code></p></div>
+        <div class="ph-r">
+          <button class="btn btn-g btn-sm" onclick="loadNews()">🔄 刷新</button>
+          <button class="btn btn-p" onclick="openNewsModal()">＋ 新建动态</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="fbar">
+          <input class="finput" id="news-search" type="text" placeholder="🔍 搜索标题…" oninput="filterNews()"/>
+          <select class="fsel" id="news-status-filter" onchange="filterNews()">
+            <option value="">全部状态</option>
+            <option value="published">已发布</option>
+            <option value="draft">草稿</option>
+            <option value="archived">已归档</option>
+          </select>
+          <select class="fsel" id="news-sort" onchange="loadNews()">
+            <option value="created_at-desc">最新创建</option>
+            <option value="created_at-asc">最早创建</option>
+            <option value="title-asc">标题 A-Z</option>
+          </select>
+        </div>
+        <div id="news-table-wrap">
+          <div class="loading"><div class="spin"></div>加载中…</div>
+        </div>
+        <div class="pag" id="news-pag" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ════ AI FEATURES ════ -->
+    <div class="page" id="page-features">
+      <div class="ph">
+        <div><h1>AI 功能管理</h1><p>表：<code style="font-size:12px;color:var(--purple)">ai_features</code></p></div>
+        <div class="ph-r">
+          <button class="btn btn-g btn-sm" onclick="loadFeatures()">🔄 刷新</button>
+          <button class="btn btn-p" onclick="openFeatModal()">＋ 新建功能</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="fbar">
+          <input class="finput" id="feat-search" type="text" placeholder="🔍 搜索功能名称…" oninput="filterFeatures()"/>
+          <select class="fsel" id="feat-status-filter" onchange="filterFeatures()">
+            <option value="">全部状态</option>
+            <option value="active">已启用</option>
+            <option value="beta">Beta</option>
+            <option value="inactive">已停用</option>
+          </select>
+          <select class="fsel" id="feat-category-filter" onchange="filterFeatures()">
+            <option value="">全部分类</option>
+            <option value="core">Core</option>
+            <option value="vision">Vision</option>
+            <option value="voice">Voice</option>
+            <option value="guard">Guard</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+        <div id="feat-table-wrap">
+          <div class="loading"><div class="spin"></div>加载中…</div>
+        </div>
+        <div class="pag" id="feat-pag" style="display:none"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════ MODAL: NEWS ════════ -->
+<div class="mbg" id="m-news">
+  <div class="mbox">
+    <div class="mhd">
+      <span class="mtitle" id="m-news-title">新建公司动态</span>
+      <button class="mclose" onclick="closeModal('m-news')">✕</button>
+    </div>
+    <div class="mbd">
+      <div class="fg">
+        <div class="ff full"><label>标题 *</label><input id="n-title" type="text" placeholder="动态标题"/></div>
+        <div class="ff full"><label>摘要</label><textarea id="n-summary" placeholder="简短摘要（显示在列表页）"></textarea></div>
+        <div class="ff full"><label>正文内容</label><textarea id="n-content" placeholder="完整内容…" style="min-height:120px"></textarea></div>
+        <div class="ff"><label>分类</label>
+          <select id="n-category">
+            <option value="announcement">公司公告</option>
+            <option value="product">产品更新</option>
+            <option value="partnership">合作动态</option>
+            <option value="event">活动资讯</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+        <div class="ff"><label>状态</label>
+          <select id="n-status">
+            <option value="draft">草稿</option>
+            <option value="published">发布</option>
+            <option value="archived">归档</option>
+          </select>
+        </div>
+        <div class="ff"><label>封面图 URL</label><input id="n-cover" type="url" placeholder="https://…"/></div>
+        <div class="ff"><label>作者</label><input id="n-author" type="text" placeholder="姓名" value="管理员"/></div>
+        <div class="ff full"><label>标签（逗号分隔）</label><input id="n-tags" type="text" placeholder="AI, 产品, 公告"/></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn btn-g" onclick="closeModal('m-news')">取消</button>
+      <button class="btn btn-p" onclick="saveNews()" id="n-save-btn">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: FEATURES ════════ -->
+<div class="mbg" id="m-feat">
+  <div class="mbox">
+    <div class="mhd">
+      <span class="mtitle" id="m-feat-title">新建 AI 功能</span>
+      <button class="mclose" onclick="closeModal('m-feat')">✕</button>
+    </div>
+    <div class="mbd">
+      <div class="fg">
+        <div class="ff full"><label>功能名称 *</label><input id="f-name" type="text" placeholder="如：多模态推理引擎"/></div>
+        <div class="ff full"><label>功能描述</label><textarea id="f-desc" placeholder="详细描述此功能的作用与优势…"></textarea></div>
+        <div class="ff"><label>所属产品线</label>
+          <select id="f-category">
+            <option value="core">Core</option>
+            <option value="vision">Vision</option>
+            <option value="voice">Voice</option>
+            <option value="guard">Guard</option>
+            <option value="finetune">Fine-tune</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+        <div class="ff"><label>状态</label>
+          <select id="f-status">
+            <option value="active">已启用</option>
+            <option value="beta">Beta</option>
+            <option value="inactive">已停用</option>
+          </select>
+        </div>
+        <div class="ff"><label>图标（Emoji）</label><input id="f-icon" type="text" placeholder="🧠" maxlength="4"/></div>
+        <div class="ff"><label>排序权重</label><input id="f-sort" type="number" placeholder="0" value="0"/></div>
+        <div class="ff full"><label>亮点参数（逗号分隔）</label><input id="f-highlights" type="text" placeholder="&lt;10ms 延迟, 70B 参数, INT4 精度"/></div>
+        <div class="ff full"><label>文档链接</label><input id="f-docs" type="url" placeholder="https://docs.nova.ai/…"/></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn btn-g" onclick="closeModal('m-feat')">取消</button>
+      <button class="btn btn-p" onclick="saveFeature()" id="f-save-btn">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ CONFIRM ════════ -->
+<div class="cbg" id="m-confirm">
+  <div class="cbox">
+    <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+    <h3 id="confirm-title">确认删除？</h3>
+    <p id="confirm-msg">此操作不可撤销，数据将从数据库中永久删除。</p>
+    <div class="c-btns">
+      <button class="btn btn-g" onclick="closeModal('m-confirm')">取消</button>
+      <button class="btn btn-d" id="confirm-ok">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ TOASTS ════════ -->
+<div id="toasts"></div>
+
+<script>
+/* ═══════════════════════════════════
+   CONFIG & INIT
+═══════════════════════════════════ */
+let supabase = null;
+let editingNewsId = null;
+let editingFeatId = null;
+let allNews = [];
+let allFeatures = [];
+const PAGE_SIZE = 15;
+let newsPage = 1;
+let featPage = 1;
+
+// Try restore session
+window.addEventListener('DOMContentLoaded', () => {
+  const url = sessionStorage.getItem('sb_url');
+  const key = sessionStorage.getItem('sb_key');
+  if (url && key) {
+    document.getElementById('cfg-url').value = url;
+    document.getElementById('cfg-key').value = key;
+    connectDB();
+  }
+});
+
+async function connectDB() {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+  if (!url || !key) { toast('请填写 URL 和 Key', 'er'); return; }
+
+  try {
+    supabase = window.supabase.createClient(url, key);
+    // Test connection
+    const { error } = await supabase.from('company_news').select('id', { count: 'exact', head: true });
+    if (error && error.code !== 'PGRST116') throw error;
+
+    sessionStorage.setItem('sb_url', url);
+    sessionStorage.setItem('sb_key', key);
+
+    document.getElementById('config-banner').style.display = 'none';
+    document.getElementById('app').style.display = 'grid';
+
+    setDbStatus(true);
+    await refreshAll();
+    toast('数据库连接成功 ✅', 'ok');
+  } catch(e) {
+    toast('连接失败：' + (e.message || '请检查 URL 和 Key'), 'er');
+    setDbStatus(false);
+  }
+}
+
+function disconnectDB() {
+  sessionStorage.clear();
+  supabase = null;
+  document.getElementById('config-banner').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('cfg-key').value = '';
+}
+
+function setDbStatus(ok) {
+  const dot = document.getElementById('db-dot');
+  const lbl = document.getElementById('db-label');
+  const kpi = document.getElementById('kpi-db');
+  dot.className = 'db-dot ' + (ok ? 'ok' : 'err');
+  lbl.textContent = ok ? 'Connected' : 'Error';
+  if (kpi) kpi.textContent = ok ? '已连接' : '连接失败';
+}
+
+/* ═══════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════ */
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('on'));
+  document.getElementById('page-' + id).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(s => {
+    if (s.getAttribute('onclick')?.includes("'"+id+"'")) s.classList.add('on');
+  });
+  if (id === 'news') loadNews();
+  if (id === 'features') loadFeatures();
+}
+
+async function refreshAll() {
+  await Promise.all([loadNews(), loadFeatures()]);
+  updateOverview();
+}
+
+/* ═══════════════════════════════════
+   OVERVIEW
+═══════════════════════════════════ */
+function updateOverview() {
+  const totalNews = allNews.length;
+  const pubNews = allNews.filter(n => n.status === 'published').length;
+  const totalFeat = allFeatures.length;
+  const activeFeat = allFeatures.filter(f => f.status === 'active').length;
+  const draft = allNews.filter(n => n.status === 'draft').length;
+
+  document.getElementById('kpi-news').textContent = totalNews || '0';
+  document.getElementById('kpi-news-pub').textContent = `已发布 ${pubNews}`;
+  document.getElementById('kpi-feat').textContent = totalFeat || '0';
+  document.getElementById('kpi-feat-active').textContent = `已启用 ${activeFeat}`;
+  document.getElementById('kpi-draft').textContent = draft || '0';
+  document.getElementById('news-cnt').textContent = totalNews || '0';
+  document.getElementById('feat-cnt').textContent = totalFeat || '0';
+
+  // Overview tables (latest 5)
+  renderOverviewNews(allNews.slice(0, 5));
+  renderOverviewFeatures(allFeatures.slice(0, 5));
+}
+
+function renderOverviewNews(rows) {
+  const wrap = document.getElementById('ov-news-wrap');
+  if (!rows.length) { wrap.innerHTML = emptyHtml('暂无动态'); return; }
+  wrap.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>标题</th><th>分类</th><th>状态</th><th>作者</th><th>创建时间</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr>
+        <td style="font-weight:500">${esc(r.title||'—')}</td>
+        <td>${categoryBadgeNews(r.category)}</td>
+        <td>${statusBadgeNews(r.status)}</td>
+        <td style="color:var(--gray)">${esc(r.author||'—')}</td>
+        <td style="color:var(--gray);font-size:12px">${fmtDate(r.created_at)}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function renderOverviewFeatures(rows) {
+  const wrap = document.getElementById('ov-feat-wrap');
+  if (!rows.length) { wrap.innerHTML = emptyHtml('暂无功能'); return; }
+  wrap.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>功能名称</th><th>产品线</th><th>状态</th><th>排序</th><th>创建时间</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr>
+        <td style="font-weight:500">${r.icon ? r.icon+' ' : ''}${esc(r.name||'—')}</td>
+        <td>${categoryBadgeFeat(r.category)}</td>
+        <td>${statusBadgeFeat(r.status)}</td>
+        <td style="color:var(--gray)">${r.sort_order ?? 0}</td>
+        <td style="color:var(--gray);font-size:12px">${fmtDate(r.created_at)}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+/* ═══════════════════════════════════
+   COMPANY NEWS — CRUD
+═══════════════════════════════════ */
+async function loadNews() {
+  const wrap = document.getElementById('news-table-wrap');
+  wrap.innerHTML = `<div class="loading"><div class="spin"></div>加载中…</div>`;
+
+  try {
+    const sort = document.getElementById('news-sort')?.value || 'created_at-desc';
+    const [col, dir] = sort.split('-');
+    const { data, error } = await supabase
+      .from('company_news')
+      .select('*')
+      .order(col, { ascending: dir === 'asc' });
+    if (error) throw error;
+    allNews = data || [];
+    filterNews();
+    updateOverview();
+  } catch(e) {
+    wrap.innerHTML = errorHtml(e.message);
+    toast('加载失败：' + e.message, 'er');
+  }
+}
+
+function filterNews() {
+  const q = (document.getElementById('news-search')?.value || '').toLowerCase();
+  const st = document.getElementById('news-status-filter')?.value || '';
+  let rows = allNews.filter(r =>
+    (!q || (r.title||'').toLowerCase().includes(q) || (r.summary||'').toLowerCase().includes(q)) &&
+    (!st || r.status === st)
+  );
+  newsPage = 1;
+  renderNewsTable(rows);
+}
+
+function renderNewsTable(rows) {
+  const wrap = document.getElementById('news-table-wrap');
+  const pag = document.getElementById('news-pag');
+  if (!rows.length) { wrap.innerHTML = emptyHtml('暂无匹配的动态'); pag.style.display='none'; return; }
+
+  const total = rows.length;
+  const start = (newsPage - 1) * PAGE_SIZE;
+  const paged = rows.slice(start, start + PAGE_SIZE);
+
+  wrap.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>标题</th><th>分类</th><th>状态</th><th>作者</th><th>标签</th><th>创建时间</th><th>操作</th></tr></thead>
+    <tbody>${paged.map(r => `
+      <tr>
+        <td style="font-weight:500;max-width:220px">${esc(r.title||'—')}</td>
+        <td>${categoryBadgeNews(r.category)}</td>
+        <td>${statusBadgeNews(r.status)}</td>
+        <td style="color:var(--gray)">${esc(r.author||'—')}</td>
+        <td style="color:var(--gray);font-size:11px">${(r.tags||[]).slice(0,2).join(', ')||'—'}</td>
+        <td style="color:var(--gray);font-size:12px">${fmtDate(r.created_at)}</td>
+        <td><div class="acts">
+          <button class="act" title="编辑" onclick="editNews('${r.id}')">✏️</button>
+          <button class="act" title="切换发布" onclick="toggleNewsStatus('${r.id}','${r.status}')">${r.status==='published'?'🔽':'🔼'}</button>
+          <button class="act" title="删除" onclick="confirmDelete('news','${r.id}','${esc(r.title||'此条目')}')">🗑️</button>
+        </div></td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+
+  // Pagination
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) { pag.style.display='none'; return; }
+  pag.style.display = 'flex';
+  pag.innerHTML = renderPag(newsPage, pages, 'newsPage');
+}
+
+async function saveNews() {
+  const title = document.getElementById('n-title').value.trim();
+  if (!title) { toast('请填写标题', 'er'); return; }
+
+  const btn = document.getElementById('n-save-btn');
+  btn.textContent = '保存中…'; btn.disabled = true;
+
+  const payload = {
+    title,
+    summary:   document.getElementById('n-summary').value.trim() || null,
+    content:   document.getElementById('n-content').value.trim() || null,
+    category:  document.getElementById('n-category').value,
+    status:    document.getElementById('n-status').value,
+    cover_url: document.getElementById('n-cover').value.trim() || null,
+    author:    document.getElementById('n-author').value.trim() || '管理员',
+    tags:      document.getElementById('n-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    updated_at: new Date().toISOString(),
+  };
+  if (!editingNewsId) payload.created_at = new Date().toISOString();
+
+  try {
+    let error;
+    if (editingNewsId) {
+      ({ error } = await supabase.from('company_news').update(payload).eq('id', editingNewsId));
+    } else {
+      ({ error } = await supabase.from('company_news').insert(payload));
+    }
+    if (error) throw error;
+    toast(editingNewsId ? '动态已更新 ✅' : '动态已创建 ✅', 'ok');
+    closeModal('m-news');
+    await loadNews();
+  } catch(e) {
+    toast('保存失败：' + e.message, 'er');
+  } finally {
+    btn.textContent = '💾 保存'; btn.disabled = false;
+  }
+}
+
+function openNewsModal(id = null) {
+  editingNewsId = id;
+  const row = id ? allNews.find(r => r.id == id) : null;
+  document.getElementById('m-news-title').textContent = id ? '编辑公司动态' : '新建公司动态';
+  document.getElementById('n-title').value    = row?.title || '';
+  document.getElementById('n-summary').value  = row?.summary || '';
+  document.getElementById('n-content').value  = row?.content || '';
+  document.getElementById('n-category').value = row?.category || 'announcement';
+  document.getElementById('n-status').value   = row?.status || 'draft';
+  document.getElementById('n-cover').value    = row?.cover_url || '';
+  document.getElementById('n-author').value   = row?.author || '管理员';
+  document.getElementById('n-tags').value     = (row?.tags||[]).join(', ');
+  openModal('m-news');
+}
+
+function editNews(id) { openNewsModal(id); }
+
+async function toggleNewsStatus(id, current) {
+  const next = current === 'published' ? 'draft' : 'published';
+  try {
+    const { error } = await supabase.from('company_news').update({ status: next, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw error;
+    toast(`状态已更新为「${next === 'published' ? '已发布' : '草稿'}」`, 'ok');
+    await loadNews();
+  } catch(e) { toast('操作失败：' + e.message, 'er'); }
+}
+
+async function deleteNews(id) {
+  try {
+    const { error } = await supabase.from('company_news').delete().eq('id', id);
+    if (error) throw error;
+    toast('动态已删除', 'ok');
+    await loadNews();
+  } catch(e) { toast('删除失败：' + e.message, 'er'); }
+}
+
+/* ═══════════════════════════════════
+   AI FEATURES — CRUD
+═══════════════════════════════════ */
+async function loadFeatures() {
+  const wrap = document.getElementById('feat-table-wrap');
+  wrap.innerHTML = `<div class="loading"><div class="spin"></div>加载中…</div>`;
+  try {
+    const { data, error } = await supabase
+      .from('ai_features')
+      .select('*')
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    allFeatures = data || [];
+    filterFeatures();
+    updateOverview();
+  } catch(e) {
+    wrap.innerHTML = errorHtml(e.message);
+    toast('加载失败：' + e.message, 'er');
+  }
+}
+
+function filterFeatures() {
+  const q  = (document.getElementById('feat-search')?.value || '').toLowerCase();
+  const st = document.getElementById('feat-status-filter')?.value || '';
+  const ct = document.getElementById('feat-category-filter')?.value || '';
+  let rows = allFeatures.filter(r =>
+    (!q || (r.name||'').toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q)) &&
+    (!st || r.status === st) &&
+    (!ct || r.category === ct)
+  );
+  featPage = 1;
+  renderFeatTable(rows);
+}
+
+function renderFeatTable(rows) {
+  const wrap = document.getElementById('feat-table-wrap');
+  const pag  = document.getElementById('feat-pag');
+  if (!rows.length) { wrap.innerHTML = emptyHtml('暂无匹配的功能'); pag.style.display='none'; return; }
+
+  const total = rows.length;
+  const start = (featPage - 1) * PAGE_SIZE;
+  const paged = rows.slice(start, start + PAGE_SIZE);
+
+  wrap.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>功能名称</th><th>产品线</th><th>描述</th><th>状态</th><th>亮点</th><th>排序</th><th>更新时间</th><th>操作</th></tr></thead>
+    <tbody>${paged.map(r => `
+      <tr>
+        <td style="font-weight:600">${r.icon ? r.icon+' ' : ''}${esc(r.name||'—')}</td>
+        <td>${categoryBadgeFeat(r.category)}</td>
+        <td style="color:var(--gray);font-size:12px;max-width:160px">${esc((r.description||'').substring(0,50))}${(r.description||'').length>50?'…':''}</td>
+        <td>${statusBadgeFeat(r.status)}</td>
+        <td style="color:var(--cyan);font-size:11px;max-width:140px">${(r.highlights||[]).slice(0,2).join(' · ')||'—'}</td>
+        <td style="color:var(--gray);text-align:center">${r.sort_order??0}</td>
+        <td style="color:var(--gray);font-size:12px">${fmtDate(r.updated_at||r.created_at)}</td>
+        <td><div class="acts">
+          <button class="act" title="编辑" onclick="editFeature('${r.id}')">✏️</button>
+          <button class="act" title="切换状态" onclick="toggleFeatStatus('${r.id}','${r.status}')">${r.status==='active'?'⏸️':'▶️'}</button>
+          <button class="act" title="删除" onclick="confirmDelete('feature','${r.id}','${esc(r.name||'此条目')}')">🗑️</button>
+        </div></td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) { pag.style.display='none'; return; }
+  pag.style.display = 'flex';
+  pag.innerHTML = renderPag(featPage, pages, 'featPage');
+}
+
+async function saveFeature() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('请填写功能名称', 'er'); return; }
+
+  const btn = document.getElementById('f-save-btn');
+  btn.textContent = '保存中…'; btn.disabled = true;
+
+  const payload = {
+    name,
+    description: document.getElementById('f-desc').value.trim() || null,
+    category:    document.getElementById('f-category').value,
+    status:      document.getElementById('f-status').value,
+    icon:        document.getElementById('f-icon').value.trim() || null,
+    sort_order:  parseInt(document.getElementById('f-sort').value) || 0,
+    highlights:  document.getElementById('f-highlights').value.split(',').map(t=>t.trim()).filter(Boolean),
+    docs_url:    document.getElementById('f-docs').value.trim() || null,
+    updated_at:  new Date().toISOString(),
+  };
+  if (!editingFeatId) payload.created_at = new Date().toISOString();
+
+  try {
+    let error;
+    if (editingFeatId) {
+      ({ error } = await supabase.from('ai_features').update(payload).eq('id', editingFeatId));
+    } else {
+      ({ error } = await supabase.from('ai_features').insert(payload));
+    }
+    if (error) throw error;
+    toast(editingFeatId ? '功能已更新 ✅' : '功能已创建 ✅', 'ok');
+    closeModal('m-feat');
+    await loadFeatures();
+  } catch(e) {
+    toast('保存失败：' + e.message, 'er');
+  } finally {
+    btn.textContent = '💾 保存'; btn.disabled = false;
+  }
+}
+
+function openFeatModal(id = null) {
+  editingFeatId = id;
+  const row = id ? allFeatures.find(r => r.id == id) : null;
+  document.getElementById('m-feat-title').textContent = id ? '编辑 AI 功能' : '新建 AI 功能';
+  document.getElementById('f-name').value       = row?.name || '';
+  document.getElementById('f-desc').value       = row?.description || '';
+  document.getElementById('f-category').value   = row?.category || 'core';
+  document.getElementById('f-status').value     = row?.status || 'active';
+  document.getElementById('f-icon').value       = row?.icon || '';
+  document.getElementById('f-sort').value       = row?.sort_order ?? 0;
+  document.getElementById('f-highlights').value = (row?.highlights||[]).join(', ');
+  document.getElementById('f-docs').value       = row?.docs_url || '';
+  openModal('m-feat');
+}
+
+function editFeature(id) { openFeatModal(id); }
+
+async function toggleFeatStatus(id, current) {
+  const next = current === 'active' ? 'inactive' : 'active';
+  try {
+    const { error } = await supabase.from('ai_features').update({ status: next, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw error;
+    toast(`状态已切换为「${next === 'active' ? '已启用' : '已停用'}」`, 'ok');
+    await loadFeatures();
+  } catch(e) { toast('操作失败：' + e.message, 'er'); }
+}
+
+async function deleteFeature(id) {
+  try {
+    const { error } = await supabase.from('ai_features').delete().eq('id', id);
+    if (error) throw error;
+    toast('功能已删除', 'ok');
+    await loadFeatures();
+  } catch(e) { toast('删除失败：' + e.message, 'er'); }
+}
+
+/* ═══════════════════════════════════
+   CONFIRM DELETE
+═══════════════════════════════════ */
+function confirmDelete(type, id, name) {
+  document.getElementById('confirm-title').textContent = `确认删除「${name}」？`;
+  document.getElementById('confirm-msg').textContent   = '此操作不可撤销，数据将从 Supabase 数据库中永久删除。';
+  document.getElementById('confirm-ok').onclick = async () => {
+    closeModal('m-confirm');
+    if (type === 'news')    await deleteNews(id);
+    if (type === 'feature') await deleteFeature(id);
+  };
+  openModal('m-confirm');
+}
+
+/* ═══════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('on') }
+function closeModal(id) { document.getElementById(id).classList.remove('on') }
+document.querySelectorAll('.mbg,.cbg').forEach(bg =>
+  bg.addEventListener('click', e => { if(e.target===bg) bg.classList.remove('on') })
+);
+
+/* ═══════════════════════════════════
+   TOAST
+═══════════════════════════════════ */
+function toast(msg, type='info') {
+  const icons = { ok:'✅', er:'❌', info:'ℹ️' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => { el.style.cssText='opacity:0;transform:translateX(20px);transition:all .3s'; setTimeout(()=>el.remove(),320); }, 2800);
+}
+
+/* ═══════════════════════════════════
+   PAGINATION
+═══════════════════════════════════ */
+function renderPag(cur, total, varName) {
+  let html = '';
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || Math.abs(i - cur) <= 1) {
+      html += `<button class="pg ${i===cur?'on':''}" onclick="${varName}=${i};${varName==='newsPage'?'filterNews()':'filterFeatures()'}"> ${i} </button>`;
+    } else if (Math.abs(i - cur) === 2) {
+      html += `<span style="color:var(--gray);padding:0 3px">…</span>`;
+    }
+  }
+  html += `<span class="pg-info">共 ${total} 页</span>`;
+  return html;
+}
+
+/* ═══════════════════════════════════
+   BADGES & UTILS
+═══════════════════════════════════ */
+function statusBadgeNews(s) {
+  const m = { published: ['b-green','● 已发布'], draft: ['b-orange','◐ 草稿'], archived: ['b-gray','○ 已归档'] };
+  const [cls, txt] = m[s] || ['b-gray', s||'—'];
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+function categoryBadgeNews(c) {
+  const m = { announcement:'b-blue', product:'b-purple', partnership:'b-green', event:'b-orange', other:'b-gray' };
+  const lbl = { announcement:'公告', product:'产品', partnership:'合作', event:'活动', other:'其他' };
+  return `<span class="badge ${m[c]||'b-gray'}">${lbl[c]||c||'—'}</span>`;
+}
+function statusBadgeFeat(s) {
+  const m = { active: ['b-green','● 已启用'], beta: ['b-orange','β Beta'], inactive: ['b-gray','○ 已停用'] };
+  const [cls, txt] = m[s] || ['b-gray', s||'—'];
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+function categoryBadgeFeat(c) {
+  const m = { core:'b-blue', vision:'b-purple', voice:'b-green', guard:'b-red', finetune:'b-orange', other:'b-gray' };
+  return `<span class="badge ${m[c]||'b-gray'}">${(c||'—').toUpperCase()}</span>`;
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); }
+  catch { return iso.substring(0,10); }
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function emptyHtml(msg) { return `<div class="empty"><div class="empty-ico">📭</div><p>${msg}</p></div>`; }
+function errorHtml(msg) { return `<div class="empty"><div class="empty-ico">⚠️</div><p style="color:var(--red)">${msg}</p></div>`; }
+
+/* ═══════════════════════════════════
+   GLOBAL SEARCH
+═══════════════════════════════════ */
+document.getElementById('gsearch').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const q = e.target.value.trim();
+    if (!q) return;
+    // Search news
+    const nr = allNews.filter(r => (r.title||'').toLowerCase().includes(q.toLowerCase()));
+    if (nr.length) { nav('news'); document.getElementById('news-search').value = q; filterNews(); toast(`在动态中找到 ${nr.length} 条结果`, 'info'); }
+    else { toast('未找到匹配结果', 'info'); }
+    e.target.value = '';
+  }
+});
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); document.getElementById('gsearch').focus(); }
+});
+
+/* ═══════════════════════════════════
+   SQL HELPER (console info)
+═══════════════════════════════════ */
+console.info(`%c NOVA AI Admin
+%c 需要创建 Supabase 表？在 Supabase SQL Editor 中运行：
+
+-- company_news 表
+create table if not exists company_news (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  summary text,
+  content text,
+  category text default 'announcement',
+  status text default 'draft',
+  cover_url text,
+  author text default '管理员',
+  tags text[] default '{}',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- ai_features 表
+create table if not exists ai_features (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  description text,
+  category text default 'core',
+  status text default 'active',
+  icon text,
+  sort_order int default 0,
+  highlights text[] default '{}',
+  docs_url text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- RLS (开发环境可先关闭)
+alter table company_news enable row level security;
+alter table ai_features enable row level security;
+create policy "allow all" on company_news for all using (true);
+create policy "allow all" on ai_features for all using (true);
+`, 'color:#0071e3;font-weight:700;font-size:14px', 'color:#86868b;font-size:12px');
+</script>
+</body>
+</html>
