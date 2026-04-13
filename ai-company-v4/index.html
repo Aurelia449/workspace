@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NOVA AI — 重新定义企业智能</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --f:-apple-system,"SF Pro Display","Helvetica Neue",sans-serif;
+  --bg:#000;--fg:#f5f5f7;--gray:#86868b;
+  --blue:#0071e3;--cyan:#32ade6;--purple:#bf5af2;
+  --green:#30d158;--orange:#ff9f0a;
+  --border:rgba(255,255,255,.08);
+  --glass:rgba(255,255,255,.05);
+  --grad:linear-gradient(135deg,#0071e3,#bf5af2);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* ─── AMBIENT GLOW ─── */
+#glow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.gl{position:absolute;border-radius:50%;filter:blur(100px);animation:glf var(--t,24s) ease-in-out infinite alternate}
+.gl1{width:900px;height:900px;top:-350px;left:-250px;background:rgba(0,80,210,.2);--t:30s}
+.gl2{width:700px;height:700px;bottom:-250px;right:-200px;background:rgba(140,30,220,.18);--t:26s}
+.gl3{width:500px;height:500px;top:40%;left:48%;background:rgba(0,160,230,.1);--t:20s}
+@keyframes glf{to{transform:translate(60px,50px) scale(1.12)}}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;inset:0 0 auto;z-index:999;height:52px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+  background:rgba(0,0,0,.68);
+  backdrop-filter:blur(26px) saturate(180%);
+  border-bottom:1px solid var(--border);
+  transition:background .3s;
+}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-mark{
+  width:30px;height:30px;border-radius:8px;background:var(--grad);
+  display:grid;place-items:center;font-size:14px;font-weight:900;color:#fff;
+  box-shadow:0 0 22px rgba(0,113,227,.45);
+}
+.nav-name{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.nav-ul{list-style:none;display:flex;gap:28px}
+.nav-ul a{font-size:13px;color:rgba(245,245,247,.58);transition:color .2s}
+.nav-ul a:hover{color:var(--fg)}
+.nav-r{display:flex;align-items:center;gap:12px}
+.nav-login{font-size:13px;color:rgba(245,245,247,.58);transition:color .2s}
+.nav-login:hover{color:var(--fg)}
+.nav-cta{
+  padding:8px 18px;border-radius:980px;font-size:13px;font-weight:600;
+  background:var(--blue);color:#fff;
+  box-shadow:0 0 20px rgba(0,113,227,.32);
+  transition:filter .2s,transform .15s;
+}
+.nav-cta:hover{filter:brightness(1.12);transform:scale(1.03)}
+
+/* ─── HERO ─── */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:100px 24px 80px;overflow:hidden;
+}
+/* subtle grid */
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black,transparent);
+}
+.hero-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:500;letter-spacing:1.5px;
+  color:rgba(50,173,230,.95);
+  background:rgba(50,173,230,.07);border:1px solid rgba(50,173,230,.2);
+  padding:6px 16px;border-radius:980px;margin-bottom:30px;
+  opacity:0;animation:riseUp .65s .06s ease forwards;
+}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:blink 2.2s ease-in-out infinite}
+.hero h1{
+  font-size:clamp(52px,9.5vw,108px);font-weight:700;
+  letter-spacing:-4.5px;line-height:.99;
+  opacity:0;animation:riseUp .82s .2s ease forwards;
+}
+.h1-top{display:block;color:var(--fg)}
+.h1-bot{
+  display:block;
+  background:linear-gradient(122deg,#60a5fa 0%,var(--cyan) 38%,var(--purple) 72%,#f9a8d4 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-size:200%;animation:bgSlide 6s linear infinite;
+}
+@keyframes bgSlide{0%{background-position:0%}100%{background-position:200%}}
+.hero-sub{
+  margin-top:22px;font-size:clamp(15px,2vw,20px);font-weight:300;
+  color:rgba(245,245,247,.5);max-width:560px;line-height:1.8;
+  opacity:0;animation:riseUp .8s .34s ease forwards;
+}
+.hero-btns{
+  margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+  opacity:0;animation:riseUp .8s .48s ease forwards;
+}
+.btn-p{
+  padding:14px 32px;border-radius:980px;font-size:16px;font-weight:600;
+  background:var(--blue);color:#fff;
+  box-shadow:0 4px 30px rgba(0,113,227,.42);
+  transition:filter .2s,transform .16s,box-shadow .2s;
+}
+.btn-p:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 8px 44px rgba(0,113,227,.56)}
+.btn-s{
+  padding:14px 28px;border-radius:980px;font-size:16px;font-weight:500;
+  border:1.5px solid rgba(255,255,255,.18);color:var(--fg);
+  transition:background .2s,border-color .2s,transform .16s;
+}
+.btn-s:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.32);transform:translateY(-2px)}
+
+/* ─── HERO WINDOW MOCKUP ─── */
+.win-wrap{
+  margin-top:68px;width:min(920px,94vw);
+  border-radius:18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 56px 160px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.04);
+  opacity:0;animation:riseUp .95s .64s ease forwards;
+}
+.win-title-bar{
+  background:#1c1c1e;height:38px;
+  display:flex;align-items:center;padding:0 14px;gap:7px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.wd{width:12px;height:12px;border-radius:50%}
+.win-url-bar{
+  flex:1;margin:0 60px;background:rgba(255,255,255,.06);
+  border-radius:5px;height:22px;display:flex;align-items:center;
+  padding:0 12px;font-size:11px;color:rgba(255,255,255,.28);letter-spacing:.2px;
+}
+.win-main{background:#08080e;display:grid;grid-template-columns:210px 1fr;min-height:360px}
+/* sidebar */
+.wsb{border-right:1px solid rgba(255,255,255,.06);padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.wsi{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:13px;color:rgba(245,245,247,.38);cursor:pointer;transition:background .15s,color .15s}
+.wsi:hover{background:rgba(255,255,255,.05);color:rgba(245,245,247,.65)}
+.wsi.act{background:rgba(0,113,227,.14);color:#60a5fa;font-weight:500}
+.wsi-ic{font-size:14px;width:18px;text-align:center}
+.ws-sep{height:1px;background:rgba(255,255,255,.05);margin:8px 0}
+/* content */
+.wcnt{padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.wkpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px}
+.kpi-l{font-size:11px;color:rgba(245,245,247,.28);letter-spacing:.4px;margin-bottom:5px}
+.kpi-v{font-size:20px;font-weight:700;letter-spacing:-1px}
+.kpi-v.bl{color:#60a5fa}.kpi-v.gr{color:var(--green)}.kpi-v.pu{color:var(--purple)}.kpi-v.or{color:var(--orange)}
+.kpi-d{font-size:11px;color:var(--green);margin-top:3px}
+.wgrid2{display:grid;grid-template-columns:3fr 2fr;gap:12px;flex:1}
+/* chart */
+.wchart{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px}
+.wct{font-size:11px;color:rgba(245,245,247,.3);letter-spacing:.3px;margin-bottom:10px}
+.wbars{display:flex;align-items:flex-end;gap:5px;height:72px}
+.wb{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,rgba(0,113,227,.72),rgba(0,113,227,.12))}
+.wb:nth-child(even){background:linear-gradient(180deg,rgba(191,90,242,.62),rgba(191,90,242,.1))}
+/* ai chat */
+.wchat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:7px}
+.cm{font-size:12px;line-height:1.55;padding:8px 11px;border-radius:8px}
+.cm.ai{background:rgba(255,255,255,.06);color:rgba(245,245,247,.75);max-width:92%}
+.cm.u{background:rgba(0,113,227,.18);color:rgba(245,245,247,.85);align-self:flex-end;max-width:85%}
+.cm-dots{display:flex;gap:4px;align-items:center;padding:7px 11px}
+.cm-dots span{width:5px;height:5px;border-radius:50%;background:rgba(245,245,247,.28);animation:bounce 1.2s ease-in-out infinite}
+.cm-dots span:nth-child(2){animation-delay:.2s}
+.cm-dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+/* ─── LOGOS BAND ─── */
+.logos-band{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:34px 24px;background:rgba(4,4,8,.6);
+}
+.logos-inner{max-width:900px;margin:0 auto;text-align:center}
+.logos-lbl{font-size:12px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
+.logos-row{display:flex;justify-content:center;align-items:center;gap:44px;flex-wrap:wrap}
+.logo-nm{font-size:15px;font-weight:700;letter-spacing:-.4px;color:rgba(245,245,247,.16);cursor:default;transition:color .25s}
+.logo-nm:hover{color:rgba(245,245,247,.42)}
+
+/* ─── SECTION BASE ─── */
+.sec{position:relative;z-index:1;padding:112px 24px}
+.w{max-width:980px;margin:0 auto}
+.ey{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:16px}
+.sh{font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-2px;line-height:1.07;max-width:700px}
+.sh i{font-style:normal;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sp{margin-top:18px;font-size:17px;font-weight:300;color:rgba(245,245,247,.46);max-width:540px;line-height:1.82}
+
+/* ─── BENTO GRID ─── */
+.bento{margin-top:58px;display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.bc{
+  background:rgba(10,10,15,.95);border:1px solid var(--border);
+  border-radius:22px;padding:36px 34px;
+  position:relative;overflow:hidden;
+  transition:transform .28s ease,border-color .28s;
+}
+.bc:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.16)}
+.bc::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none}
+.bc:hover::before{opacity:1}
+.col12{grid-column:span 12}.col7{grid-column:span 7}.col5{grid-column:span 5}
+.col4{grid-column:span 4}.col8{grid-column:span 8}
+.tb::before{background:radial-gradient(ellipse at 0 0,rgba(0,113,227,.13),transparent 55%)}
+.tp::before{background:radial-gradient(ellipse at 100% 0,rgba(191,90,242,.11),transparent 55%)}
+.tc::before{background:radial-gradient(ellipse at 0 100%,rgba(50,173,230,.11),transparent 55%)}
+.tg::before{background:radial-gradient(ellipse at 100% 100%,rgba(48,209,88,.09),transparent 55%)}
+.to::before{background:radial-gradient(ellipse at 50% 0,rgba(255,159,10,.09),transparent 55%)}
+.tr::before{background:radial-gradient(ellipse at 0 50%,rgba(255,69,58,.08),transparent 55%)}
+.b-tag{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px;position:relative;z-index:1}
+.b-ico{width:48px;height:48px;border-radius:13px;margin-bottom:18px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);position:relative;z-index:1}
+.b-name{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:9px;position:relative;z-index:1}
+.b-desc{font-size:14px;color:rgba(245,245,247,.46);line-height:1.72;position:relative;z-index:1}
+.b-more{display:inline-flex;align-items:center;gap:5px;margin-top:14px;font-size:14px;color:var(--blue);font-weight:500;position:relative;z-index:1;transition:gap .2s}
+.b-more:hover{gap:9px}
+/* wide card */
+.wi{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;position:relative;z-index:1}
+.wiv{
+  aspect-ratio:4/3;border-radius:16px;overflow:hidden;
+  background:linear-gradient(148deg,#09091a,#12123a);
+  border:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+.wiv::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 38% 36%,rgba(0,113,227,.22),transparent 55%),radial-gradient(circle at 68% 68%,rgba(191,90,242,.15),transparent 50%)}
+.wiv-n{position:relative;font-size:62px;font-weight:800;letter-spacing:-3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+.wiv-l{position:relative;font-size:10px;color:rgba(245,245,247,.22);letter-spacing:2px;text-transform:uppercase;margin-top:5px;text-align:center}
+
+/* ─── TICKER ─── */
+.ticker{position:relative;z-index:1;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(4,4,8,.7)}
+.tkr{display:flex;width:max-content;animation:tkscroll 30s linear infinite}
+.tkr:hover{animation-play-state:paused}
+.tki{display:flex;flex-direction:column;align-items:center;padding:40px 56px;border-right:1px solid rgba(255,255,255,.05)}
+.tki-n{font-size:clamp(38px,4.5vw,54px);font-weight:700;letter-spacing:-2.5px;background:linear-gradient(135deg,#fff,rgba(255,255,255,.36));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tki-l{font-size:11px;color:rgba(245,245,247,.28);margin-top:5px;letter-spacing:.5px}
+
+/* ─── STEPS ─── */
+.steps-grid{margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);border-radius:20px;overflow:hidden;border:1px solid var(--border);gap:0}
+.step{padding:48px 34px;position:relative;border-right:1px solid var(--border);background:rgba(10,10,14,.95);transition:background .22s}
+.step:last-child{border-right:none}
+.step:hover{background:rgba(18,18,26,.95)}
+.step-bar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}
+.step:hover .step-bar{transform:scaleX(1)}
+.step-num{font-size:52px;font-weight:800;letter-spacing:-3px;color:rgba(255,255,255,.04);line-height:1;margin-bottom:16px}
+.step-ico{font-size:30px;margin-bottom:14px}
+.step h3{font-size:18px;font-weight:600;letter-spacing:-.3px;margin-bottom:10px}
+.step p{font-size:14px;color:rgba(245,245,247,.42);line-height:1.72}
+
+/* ─── NUMBERS ─── */
+.nums-strip{position:relative;z-index:1;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.nums-grid{display:grid;grid-template-columns:repeat(4,1fr);border-right:1px solid var(--border)}
+.nc{padding:52px 28px;text-align:center;border-left:1px solid var(--border);transition:background .2s}
+.nc:hover{background:rgba(255,255,255,.025)}
+.nc-v{font-size:clamp(42px,5.5vw,66px);font-weight:700;letter-spacing:-3.5px;line-height:1}
+.n-gb{background:linear-gradient(135deg,#60a5fa,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.n-gp{background:linear-gradient(135deg,var(--purple),#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.n-gg{background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.n-go{background:linear-gradient(135deg,var(--orange),#ff453a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nc-l{font-size:13px;color:var(--gray);margin-top:9px;letter-spacing:.3px}
+
+/* ─── CASES ─── */
+.cases-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-top:52px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.cases-tabs::-webkit-scrollbar{display:none}
+.ctab{padding:14px 22px;font-size:14px;font-weight:500;color:var(--gray);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.ctab:hover{color:var(--fg)}
+.ctab.on{color:var(--fg);border-bottom-color:var(--blue)}
+.cpanel{display:none;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-top:40px}
+.cpanel.on{display:grid}
+.cp-h{font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-1px;line-height:1.18;margin-bottom:14px}
+.cp-p{font-size:15px;color:rgba(245,245,247,.46);line-height:1.8;margin-bottom:22px}
+.cp-ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.cp-ul li{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(245,245,247,.68)}
+.cp-ck{color:var(--green);font-size:14px;flex-shrink:0}
+.cp-vis{aspect-ratio:4/3;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:60px;border:1px solid rgba(255,255,255,.07);overflow:hidden;position:relative}
+.cp-vis::before{content:'';position:absolute;inset:0}
+.cv1{background:#000a20}.cv1::before{background:radial-gradient(circle at 40% 38%,rgba(0,113,227,.24),transparent 55%)}
+.cv2{background:#0e0020}.cv2::before{background:radial-gradient(circle at 55% 40%,rgba(191,90,242,.22),transparent 55%)}
+.cv3{background:#001408}.cv3::before{background:radial-gradient(circle at 38% 48%,rgba(48,209,88,.2),transparent 55%)}
+.cv4{background:#150800}.cv4::before{background:radial-gradient(circle at 52% 42%,rgba(255,159,10,.2),transparent 55%)}
+
+/* ─── TECH ACCORDION ─── */
+.tech-layout{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-top:60px}
+.tech-items{display:flex;flex-direction:column}
+.ti{border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer}
+.ti:last-child{border-bottom:none}
+.ti-head{display:flex;align-items:center;gap:14px;padding:22px 0;transition:opacity .2s}
+.ti:not(.on) .ti-head{opacity:.4}
+.ti:not(.on):hover .ti-head{opacity:.7}
+.ti-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);flex-shrink:0;transition:background .2s,border-color .2s}
+.ti.on .ti-ico{background:rgba(0,113,227,.15);border-color:rgba(0,113,227,.28)}
+.ti-t{font-size:15px;font-weight:600;letter-spacing:-.2px}
+.ti-body{font-size:13px;color:rgba(245,245,247,.4);line-height:1.74;padding:0 0 0 54px;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .35s,padding .35s}
+.ti.on .ti-body{max-height:120px;opacity:1;padding-bottom:20px}
+.tech-vis{
+  position:sticky;top:80px;
+  aspect-ratio:3/4;border-radius:22px;
+  background:linear-gradient(148deg,#080810,#10101e);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  transition:box-shadow .5s;
+}
+.tech-vis-inner{position:relative;z-index:1;text-align:center}
+.tv-ico{font-size:56px;display:block;margin-bottom:16px}
+.tv-lbl{font-size:11px;color:rgba(245,245,247,.26);letter-spacing:2px;text-transform:uppercase}
+
+/* ─── TESTIMONIALS ─── */
+.tscroll{overflow:hidden;margin-top:52px}
+.trow{display:flex;gap:14px;width:max-content;animation:tkscroll 42s linear infinite}
+.trow:hover{animation-play-state:paused}
+.trow.rev{animation-direction:reverse;animation-duration:50s;margin-top:14px}
+.tc2{
+  width:336px;flex-shrink:0;
+  background:rgba(10,10,15,.95);border:1px solid var(--border);
+  border-radius:18px;padding:26px 28px;transition:border-color .2s;
+}
+.tc2:hover{border-color:rgba(255,255,255,.15)}
+.tc2-stars{font-size:12px;color:#ffd60a;letter-spacing:2px;margin-bottom:14px}
+.tc2-text{font-size:14px;color:rgba(245,245,247,.66);line-height:1.78;margin-bottom:18px}
+.tc2-auth{display:flex;align-items:center;gap:12px}
+.tc2-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.tc2-name{font-size:14px;font-weight:600}
+.tc2-role{font-size:12px;color:var(--gray);margin-top:1px}
+
+/* ─── PRICING ─── */
+.ptoggle{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:36px;font-size:14px;color:var(--gray)}
+.psw{width:44px;height:24px;border-radius:12px;background:rgba(255,255,255,.1);cursor:pointer;position:relative;transition:background .2s}
+.psw.on{background:var(--blue)}
+.psw-th{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+.psw.on .psw-th{left:23px}
+.psave{font-size:11px;color:var(--green);background:rgba(48,209,88,.1);border:1px solid rgba(48,209,88,.2);padding:2px 8px;border-radius:4px}
+.pcards{margin-top:52px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+.pcard{border-radius:22px;padding:36px 30px;background:rgba(10,10,15,.95);border:1px solid var(--border);transition:transform .25s,border-color .25s}
+.pcard:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.15)}
+.pcard.hot{background:linear-gradient(148deg,rgba(0,50,150,.24),rgba(90,10,160,.15));border-color:rgba(0,113,227,.28);position:relative}
+.hot-lbl{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--grad);color:#fff;padding:5px 18px;border-radius:980px;white-space:nowrap}
+.p-tier{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gray);margin-bottom:14px}
+.p-price{font-size:clamp(38px,4vw,52px);font-weight:700;letter-spacing:-2.5px;line-height:1;margin-bottom:6px}
+.p-price sup{font-size:20px;font-weight:600;vertical-align:top;margin-top:9px;margin-right:2px}
+.p-desc{font-size:13px;color:var(--gray);margin-bottom:22px}
+.p-hr{border:none;border-top:1px solid rgba(255,255,255,.07);margin-bottom:22px}
+.p-feats{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:28px}
+.p-feats li{display:flex;align-items:center;gap:9px;font-size:14px;color:rgba(245,245,247,.68)}
+.p-feats li.dim{color:rgba(245,245,247,.22)}
+.pfy{color:var(--green);font-size:14px;flex-shrink:0}
+.pfn{color:rgba(245,245,247,.16);font-size:14px;flex-shrink:0}
+.p-btn{display:block;text-align:center;padding:13px;border-radius:12px;font-size:15px;font-weight:600;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);color:var(--fg);transition:background .2s}
+.p-btn:hover{background:rgba(255,255,255,.13)}
+.pcard.hot .p-btn{background:var(--blue);border-color:var(--blue);box-shadow:0 4px 24px rgba(0,113,227,.3)}
+.pcard.hot .p-btn:hover{filter:brightness(1.1)}
+
+/* ─── TEAM ─── */
+.team-grid{margin-top:56px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.tmcard{background:rgba(10,10,15,.95);border:1px solid var(--border);border-radius:20px;padding:28px 22px;text-align:center;transition:transform .25s,border-color .25s}
+.tmcard:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.15)}
+.tm-av{width:68px;height:68px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid rgba(255,255,255,.1)}
+.tm-name{font-size:15px;font-weight:600;letter-spacing:-.2px;margin-bottom:4px}
+.tm-role{font-size:13px;color:var(--gray);margin-bottom:12px}
+.tm-chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.tm-chip{font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(245,245,247,.46)}
+
+/* ─── FAQ ─── */
+.faq-list{margin-top:52px}
+.faq-item{border-bottom:1px solid rgba(255,255,255,.07)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;cursor:pointer;font-size:16px;font-weight:500;letter-spacing:-.2px;transition:color .2s}
+.faq-q:hover{color:rgba(245,245,247,.7)}
+.faq-ic{font-size:20px;color:var(--gray);flex-shrink:0;transition:transform .3s,color .2s}
+.faq-item.open .faq-ic{transform:rotate(45deg);color:var(--blue)}
+.faq-ans{font-size:15px;color:rgba(245,245,247,.44);line-height:1.8;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s}
+.faq-item.open .faq-ans{max-height:220px;padding-bottom:22px}
+
+/* ─── FINAL CTA ─── */
+.cta-final{
+  position:relative;z-index:1;padding:130px 24px;text-align:center;overflow:hidden;
+  border-top:1px solid var(--border);
+}
+.cta-final::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 22% 50%,rgba(0,113,227,.15),transparent 55%),
+    radial-gradient(ellipse at 78% 50%,rgba(191,90,242,.11),transparent 55%);
+}
+.cta-final h2{position:relative;font-size:clamp(36px,6vw,68px);font-weight:700;letter-spacing:-3px;line-height:1.02;margin-bottom:20px}
+.cta-final p{position:relative;font-size:18px;font-weight:300;color:rgba(245,245,247,.46);max-width:480px;margin:0 auto 44px;line-height:1.8}
+.cta-btns{position:relative;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.cta-note{position:relative;margin-top:18px;font-size:13px;color:var(--gray)}
+
+/* ─── FOOTER ─── */
+footer{position:relative;z-index:1;background:#000;border-top:1px solid var(--border);padding:60px 24px 32px}
+.ft{max-width:980px;margin:0 auto}
+.ft-top{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 1fr;gap:48px;padding-bottom:44px;border-bottom:1px solid var(--border)}
+.ft-about .fa-logo{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.fa-mark{width:26px;height:26px;border-radius:7px;background:var(--grad);display:grid;place-items:center;font-size:12px;font-weight:900;color:#fff}
+.fa-name{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.ft-about p{font-size:13px;color:var(--gray);line-height:1.65;max-width:210px;margin-bottom:20px}
+.ft-social{display:flex;gap:8px}
+.ft-sc{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;font-size:13px;transition:background .2s}
+.ft-sc:hover{background:rgba(255,255,255,.1)}
+.ft-col h5{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:16px}
+.ft-col ul{list-style:none}
+.ft-col li{margin-bottom:10px}
+.ft-col a{font-size:13px;color:rgba(245,245,247,.42);transition:color .2s}
+.ft-col a:hover{color:var(--fg)}
+.ft-bot{padding-top:22px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(245,245,247,.2)}
+.ft-bot a{color:rgba(245,245,247,.2);transition:color .2s}
+.ft-bot a:hover{color:rgba(245,245,247,.48)}
+
+/* ─── REVEAL ─── */
+.r{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.r.on{opacity:1;transform:none}
+.d1{transition-delay:.07s}.d2{transition-delay:.14s}.d3{transition-delay:.21s}.d4{transition-delay:.28s}
+
+/* ─── KF ─── */
+@keyframes riseUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes tkscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes blink{0%,100%{box-shadow:0 0 6px var(--cyan)}50%{box-shadow:0 0 16px var(--cyan)}}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .nav-ul,.nav-login{display:none}
+  .col7,.col5,.col8,.col4{grid-column:span 12}
+  .wi{grid-template-columns:1fr}
+  .tech-layout{grid-template-columns:1fr}
+  .tech-vis{display:none}
+  .cpanel.on{grid-template-columns:1fr}
+  .cp-vis{display:none}
+  .nums-grid{grid-template-columns:repeat(2,1fr)}
+  .steps-grid{grid-template-columns:1fr}
+  .step{border-right:none;border-bottom:1px solid var(--border)}
+  .team-grid,.pcards{grid-template-columns:1fr}
+  .ft-top{grid-template-columns:1fr 1fr}
+}
+@media(max-width:540px){
+  .win-main{grid-template-columns:1fr}
+  .wsb{display:none}
+  .wkpi{grid-template-columns:repeat(2,1fr)}
+  .wgrid2{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+  .ft-top{grid-template-columns:1fr}
+  .ft-bot{flex-direction:column;gap:8px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div id="glow">
+  <div class="gl gl1"></div>
+  <div class="gl gl2"></div>
+  <div class="gl gl3"></div>
+</div>
+
+<!-- ══ NAV ══ -->
+<nav id="nav">
+  <div class="nav-logo">
+    <div class="nav-mark">N</div>
+    <span class="nav-name">NOVA AI</span>
+  </div>
+  <ul class="nav-ul">
+    <li><a href="#products">产品</a></li>
+    <li><a href="#cases">场景</a></li>
+    <li><a href="#pricing">定价</a></li>
+    <li><a href="#team">团队</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-r">
+    <a href="#" class="nav-login">登录</a>
+    <a href="#pricing" class="nav-cta">免费开始</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-chip"><span class="chip-dot"></span>NOVA AI 2.0 · 正式发布</div>
+  <h1>
+    <span class="h1-top">让每家公司</span>
+    <span class="h1-bot">都有 AI 超能力</span>
+  </h1>
+  <p class="hero-sub">无需 AI 团队，无需 GPU 集群。NOVA 提供从大模型推理到多模态应用的完整 AI 基础设施，5 分钟接入，即刻上线。</p>
+  <div class="hero-btns">
+    <a href="#pricing" class="btn-p">免费开始使用</a>
+    <a href="#products" class="btn-s">探索产品 →</a>
+  </div>
+
+  <!-- APP WINDOW MOCK -->
+  <div class="win-wrap">
+    <div class="win-title-bar">
+      <div class="wd" style="background:#ff5f57"></div>
+      <div class="wd" style="background:#febc2e"></div>
+      <div class="wd" style="background:#28c840"></div>
+      <div class="win-url-bar">app.nova.ai — 控制台</div>
+    </div>
+    <div class="win-main">
+      <div class="wsb">
+        <div class="wsi act"><span class="wsi-ic">📊</span>概览</div>
+        <div class="wsi"><span class="wsi-ic">🧠</span>模型库</div>
+        <div class="wsi"><span class="wsi-ic">🔌</span>API 管理</div>
+        <div class="wsi"><span class="wsi-ic">📁</span>数据集</div>
+        <div class="ws-sep"></div>
+        <div class="wsi"><span class="wsi-ic">🔬</span>Fine-tune</div>
+        <div class="wsi"><span class="wsi-ic">🚀</span>部署中心</div>
+        <div class="wsi"><span class="wsi-ic">🔒</span>Guard</div>
+        <div class="wsi"><span class="wsi-ic">⚙️</span>设置</div>
+      </div>
+      <div class="wcnt">
+        <div class="wkpi">
+          <div class="kpi-card"><div class="kpi-l">今日调用</div><div class="kpi-v bl">3.8M</div><div class="kpi-d">↑ 24%</div></div>
+          <div class="kpi-card"><div class="kpi-l">平均延迟</div><div class="kpi-v gr">9ms</div><div class="kpi-d">↓ 11%</div></div>
+          <div class="kpi-card"><div class="kpi-l">活跃模型</div><div class="kpi-v pu">11</div><div class="kpi-d">+4 本周</div></div>
+          <div class="kpi-card"><div class="kpi-l">Token 用量</div><div class="kpi-v or">1.4B</div><div class="kpi-d">↑ 33%</div></div>
+        </div>
+        <div class="wgrid2">
+          <div class="wchart">
+            <div class="wct">调用量趋势（近 7 日）</div>
+            <div class="wbars">
+              <div class="wb" style="height:38%"></div>
+              <div class="wb" style="height:55%"></div>
+              <div class="wb" style="height:48%"></div>
+              <div class="wb" style="height:72%"></div>
+              <div class="wb" style="height:62%"></div>
+              <div class="wb" style="height:86%"></div>
+              <div class="wb" style="height:100%"></div>
+            </div>
+          </div>
+          <div class="wchat">
+            <div class="cm ai">你好！我是 NOVA 助手，今天有什么可以帮你？</div>
+            <div class="cm u">分析一下本月用户留存数据</div>
+            <div class="cm ai">本月留存率 71.2%，环比 +6.4%。第 7 日留存提升最明显，新推送策略是主要驱动力。</div>
+            <div class="cm-dots"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LOGOS ══ -->
+<div class="logos-band">
+  <div class="logos-inner">
+    <p class="logos-lbl r">受到 5,000+ 家企业信赖</p>
+    <div class="logos-row r d1">
+      <span class="logo-nm">Tencent</span>
+      <span class="logo-nm">ByteDance</span>
+      <span class="logo-nm">Meituan</span>
+      <span class="logo-nm">NIO</span>
+      <span class="logo-nm">PingAn</span>
+      <span class="logo-nm">CMBCHINA</span>
+      <span class="logo-nm">Xiaomi</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRODUCTS ══ -->
+<section class="sec" id="products">
+  <div class="w">
+    <p class="ey r">产品矩阵</p>
+    <h2 class="sh r d1">一套平台，<br/><i>覆盖 AI 全链路。</i></h2>
+    <p class="sp r d2">从数据处理到模型推理再到多模态应用，NOVA 提供完整 AI 工具链，开箱即用。</p>
+    <div class="bento">
+      <!-- featured wide -->
+      <div class="bc col12 tb r">
+        <div class="wi">
+          <div>
+            <div class="b-tag">旗舰引擎</div>
+            <div class="b-name" style="font-size:clamp(22px,3vw,32px);letter-spacing:-1px;line-height:1.1">NOVA Core 推理引擎</div>
+            <p class="b-desc" style="font-size:15px;margin-top:14px;max-width:420px;line-height:1.72">业界最快的大模型推理服务。支持 200+ 主流开源模型，首 token 延迟 &lt;10ms，吞吐量超主流方案 8×。按 Token 计费，零起步成本。</p>
+            <a href="#" class="b-more" style="margin-top:20px">了解 NOVA Core →</a>
+          </div>
+          <div class="wiv">
+            <div><div class="wiv-n">200+</div><div class="wiv-l">Models Supported</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="bc col4 tp r">
+        <div class="b-ico">🎨</div>
+        <div class="b-name">NOVA Vision</div>
+        <p class="b-desc">图像理解、OCR、视频分析统一 API，99.3% 精度，实时响应，支持本地与云端双模式。</p>
+        <a href="#" class="b-more">了解更多 →</a>
+      </div>
+      <div class="bc col4 tc r d1">
+        <div class="b-ico">🎙️</div>
+        <div class="b-name">NOVA Voice</div>
+        <p class="b-desc">支持 40+ 语言的 ASR / TTS，端到端延迟低至 80ms，音色风格自定义，情感控制精准。</p>
+        <a href="#" class="b-more">了解更多 →</a>
+      </div>
+      <div class="bc col4 tg r d2">
+        <div class="b-ico">🔒</div>
+        <div class="b-name">NOVA Guard</div>
+        <p class="b-desc">AI 内容安全套件，幻觉检测 + 有害内容过滤 + 隐私合规，企业级开箱即用，误判率 &lt;0.1%。</p>
+        <a href="#" class="b-more">了解更多 →</a>
+      </div>
+      <div class="bc col8 to r">
+        <div class="b-ico">🔬</div>
+        <div class="b-name">NOVA Fine-tune</div>
+        <p class="b-desc">可视化微调平台，无需代码。上传数据自动训练，最快 30 分钟出专属模型，支持 LoRA / QLoRA / 全量微调三种模式，一键部署上线。</p>
+        <a href="#" class="b-more">了解更多 →</a>
+      </div>
+      <div class="bc col4 tr r d1">
+        <div class="b-ico">📦</div>
+        <div class="b-name">NOVA Deploy</div>
+        <p class="b-desc">一键私有化部署，K8s / 裸金属 / 边缘全支持，全球 40+ 节点，弹性扩缩容。</p>
+        <a href="#" class="b-more">了解更多 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TICKER ══ -->
+<div class="ticker">
+  <div class="tkr">
+    <div class="tki"><div class="tki-n">10B+</div><div class="tki-l">每日 API 调用</div></div>
+    <div class="tki"><div class="tki-n">5,000+</div><div class="tki-l">企业客户</div></div>
+    <div class="tki"><div class="tki-n">&lt;10ms</div><div class="tki-l">首 Token 延迟</div></div>
+    <div class="tki"><div class="tki-n">99.99%</div><div class="tki-l">服务可用率</div></div>
+    <div class="tki"><div class="tki-n">200+</div><div class="tki-l">支持模型</div></div>
+    <div class="tki"><div class="tki-n">40+</div><div class="tki-l">全球节点</div></div>
+    <div class="tki"><div class="tki-n">SOC2</div><div class="tki-l">安全认证</div></div>
+    <div class="tki"><div class="tki-n">24/7</div><div class="tki-l">技术支持</div></div>
+    <div class="tki"><div class="tki-n">10B+</div><div class="tki-l">每日 API 调用</div></div>
+    <div class="tki"><div class="tki-n">5,000+</div><div class="tki-l">企业客户</div></div>
+    <div class="tki"><div class="tki-n">&lt;10ms</div><div class="tki-l">首 Token 延迟</div></div>
+    <div class="tki"><div class="tki-n">99.99%</div><div class="tki-l">服务可用率</div></div>
+    <div class="tki"><div class="tki-n">200+</div><div class="tki-l">支持模型</div></div>
+    <div class="tki"><div class="tki-n">40+</div><div class="tki-l">全球节点</div></div>
+    <div class="tki"><div class="tki-n">SOC2</div><div class="tki-l">安全认证</div></div>
+    <div class="tki"><div class="tki-n">24/7</div><div class="tki-l">技术支持</div></div>
+  </div>
+</div>
+
+<!-- ══ HOW ══ -->
+<section class="sec" style="background:rgba(5,5,8,.5)">
+  <div class="w">
+    <p class="ey r">接入流程</p>
+    <h2 class="sh r d1">三步上线，<br/><i>无需 AI 团队。</i></h2>
+    <p class="sp r d2">我们处理所有底层复杂性，你只需专注于产品本身。</p>
+    <div class="steps-grid r d3">
+      <div class="step"><div class="step-bar"></div><div class="step-num">01</div><div class="step-ico">🔌</div><h3>一行代码接入</h3><p>标准 REST / gRPC API，提供 Python、Node.js、Go、Java SDK，现有系统零改造，5 分钟完成集成。</p></div>
+      <div class="step"><div class="step-bar"></div><div class="step-num">02</div><div class="step-ico">⚙️</div><h3>选择 & 定制模型</h3><p>从 200+ 模型库挑选，或通过 Fine-tune Studio 上传私有数据完成定制，最快 30 分钟出专属模型。</p></div>
+      <div class="step"><div class="step-bar"></div><div class="step-num">03</div><div class="step-ico">🚀</div><h3>部署 & 弹性扩容</h3><p>云端、私有化、边缘三种模式，弹性自动扩缩容，SLA 99.99% 全球保障，全程可观测。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ NUMBERS ══ -->
+<div class="nums-strip">
+  <div class="nums-grid">
+    <div class="nc r"><div class="nc-v n-gb">10B+</div><div class="nc-l">每日 API 调用量</div></div>
+    <div class="nc r d1"><div class="nc-v n-gp">5,000+</div><div class="nc-l">全球企业客户</div></div>
+    <div class="nc r d2"><div class="nc-v n-gg">99.99%</div><div class="nc-l">服务可用率 SLA</div></div>
+    <div class="nc r d3"><div class="nc-v n-go">8×</div><div class="nc-l">吞吐量行业对比</div></div>
+  </div>
+</div>
+
+<!-- ══ CASES ══ -->
+<section class="sec" id="cases" style="background:rgba(5,5,8,.6)">
+  <div class="w">
+    <p class="ey r">应用场景</p>
+    <h2 class="sh r d1">你的行业，<br/><i>我们的能力。</i></h2>
+    <div class="cases-tabs r d2">
+      <div class="ctab on" data-p="p1">🏢 企业服务</div>
+      <div class="ctab" data-p="p2">🛒 电商零售</div>
+      <div class="ctab" data-p="p3">🏥 医疗健康</div>
+      <div class="ctab" data-p="p4">🎓 教育培训</div>
+    </div>
+    <div class="r d3">
+      <div class="cpanel on" id="p1"><div><div class="cp-h">智能客服 & 企业知识库</div><p class="cp-p">将企业文档、FAQ、产品手册接入 NOVA，10 分钟构建能回答任何问题的 AI 客服，准确率超 96%，全链路数据不出域。</p><ul class="cp-ul"><li><span class="cp-ck">✓</span>私有知识库 RAG 检索增强</li><li><span class="cp-ck">✓</span>多轮对话 + 上下文记忆</li><li><span class="cp-ck">✓</span>企业微信 / 钉钉 / 飞书原生接入</li><li><span class="cp-ck">✓</span>全链路数据私有化</li></ul></div><div class="cp-vis cv1">🏢</div></div>
+      <div class="cpanel" id="p2"><div><div class="cp-h">商品理解 & 个性化推荐</div><p class="cp-p">视觉 AI 自动提取商品属性，结合用户行为构建个性化推荐引擎，转化率提升 40%+，人工标注成本降低 90%。</p><ul class="cp-ul"><li><span class="cp-ck">✓</span>商品图片自动打标签</li><li><span class="cp-ck">✓</span>图搜图 / 文搜图多模态检索</li><li><span class="cp-ck">✓</span>实时个性化推荐引擎</li><li><span class="cp-ck">✓</span>评论情感分析与摘要</li></ul></div><div class="cp-vis cv2">🛒</div></div>
+      <div class="cpanel" id="p3"><div><div class="cp-h">影像辅助诊断 & 病历处理</div><p class="cp-p">端侧部署保障患者隐私，AI 辅助影像阅片速度提升 5×，病历结构化效率提升 80%，满足等保三级合规要求。</p><ul class="cp-ul"><li><span class="cp-ck">✓</span>CT / MRI / X光影像分析</li><li><span class="cp-ck">✓</span>病历自动结构化提取</li><li><span class="cp-ck">✓</span>HIPAA / 等保三级合规</li><li><span class="cp-ck">✓</span>私有化本地部署</li></ul></div><div class="cp-vis cv3">🏥</div></div>
+      <div class="cpanel" id="p4"><div><div class="cp-h">AI 学习助手 & 内容生成</div><p class="cp-p">个性化学习路径规划，Socratic 对话式辅导，课程内容自动生成，学习效率提升 3×，教师工作量降低 60%。</p><ul class="cp-ul"><li><span class="cp-ck">✓</span>自适应学习路径推荐</li><li><span class="cp-ck">✓</span>Socratic 对话式辅导</li><li><span class="cp-ck">✓</span>课件与题库自动生成</li><li><span class="cp-ck">✓</span>学情分析与可视化报告</li></ul></div><div class="cp-vis cv4">🎓</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TECH ══ -->
+<section class="sec">
+  <div class="w">
+    <p class="ey r">核心技术</p>
+    <h2 class="sh r d1">领先业界的<br/><i>AI 基础设施。</i></h2>
+    <div class="tech-layout">
+      <div class="tech-items r d1">
+        <div class="ti on" data-icon="🧬" data-label="MoE 稀疏激活架构" data-glow="rgba(0,113,227,.2)">
+          <div class="ti-head"><div class="ti-ico">🧬</div><div class="ti-t">MoE 稀疏激活架构</div></div>
+          <div class="ti-body">每次推理仅激活 12% 参数，在保持顶级精度的同时将计算成本降低 85%。混合专家架构已在生产验证，每日服务超 10 亿次调用。</div>
+        </div>
+        <div class="ti" data-icon="⚡" data-label="深度推理加速引擎" data-glow="rgba(191,90,242,.2)">
+          <div class="ti-head"><div class="ti-ico">⚡</div><div class="ti-t">深度推理加速引擎</div></div>
+          <div class="ti-body">基于 CUDA / Metal / NPU 深度优化内核，动态批处理 + KV Cache 压缩，吞吐量达业界标准 8×，延迟低至 9ms。</div>
+        </div>
+        <div class="ti" data-icon="🌐" data-label="多模态统一编码器" data-glow="rgba(50,173,230,.18)">
+          <div class="ti-head"><div class="ti-ico">🌐</div><div class="ti-t">多模态统一编码器</div></div>
+          <div class="ti-body">文本、图像、音频、视频共享同一表征空间，跨模态理解与生成无缝衔接，单 API 覆盖所有感知模态。</div>
+        </div>
+        <div class="ti" data-icon="🔒" data-label="隐私计算框架" data-glow="rgba(48,209,88,.16)">
+          <div class="ti-head"><div class="ti-ico">🔒</div><div class="ti-t">隐私计算框架</div></div>
+          <div class="ti-body">联邦学习 + 差分隐私 + 可信执行环境三层防护，数据物理不出域，模型性能不打折，满足金融 / 医疗最严合规。</div>
+        </div>
+      </div>
+      <div class="tech-vis r d2" id="tech-vis">
+        <div class="tech-vis-inner">
+          <span class="tv-ico" id="tv-ico">🧬</span>
+          <div class="tv-lbl" id="tv-lbl">MoE 稀疏激活架构</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS ══ -->
+<section class="sec" style="background:rgba(5,5,8,.6)">
+  <div class="w">
+    <p class="ey r">客户评价</p>
+    <h2 class="sh r d1">他们选择了<br/><i>NOVA AI。</i></h2>
+  </div>
+  <div class="tscroll" style="margin-top:52px">
+    <div class="trow">
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"接入 NOVA Core 之后推理成本降了 72%，延迟从 220ms 到 9ms，产品体验直接上了一个档次。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(0,113,227,.2)">👨‍💻</div><div><div class="tc2-name">张明远</div><div class="tc2-role">CTO · TechVenture</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"Vision API 把商品审核自动化率从 28% 提升到 96%，人力成本减少 80%，ROI 三个月内回正。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(191,90,242,.2)">👩‍🔬</div><div><div class="tc2-name">李晓雨</div><div class="tc2-role">AI 负责人 · ShopCloud</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"从 API 接入到上线只花了三天。Fine-tune Studio 让非技术同事也能独立完成模型定制，太香了。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(50,173,230,.2)">👨‍💼</div><div><div class="tc2-name">王浩然</div><div class="tc2-role">产品总监 · EduNext</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"医疗场景对数据安全要求极高，NOVA 私有化部署让我们在合规框架内充分享受了 AI 红利。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(48,209,88,.2)">👩‍⚕️</div><div><div class="tc2-name">陈思远</div><div class="tc2-role">架构师 · HealthCloud</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"接入 NOVA Core 之后推理成本降了 72%，延迟从 220ms 到 9ms，产品体验直接上了一个档次。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(0,113,227,.2)">👨‍💻</div><div><div class="tc2-name">张明远</div><div class="tc2-role">CTO · TechVenture</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"Vision API 把商品审核自动化率从 28% 提升到 96%，人力成本减少 80%，ROI 三个月内回正。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(191,90,242,.2)">👩‍🔬</div><div><div class="tc2-name">李晓雨</div><div class="tc2-role">AI 负责人 · ShopCloud</div></div></div></div>
+    </div>
+    <div class="trow rev">
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"NOVA Guard 让 UGC 平台实现实时内容安全，误判率不到 0.1%，终于可以放心扩量了。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(255,159,10,.2)">👨‍🎨</div><div><div class="tc2-name">刘天宇</div><div class="tc2-role">工程 VP · CreativeHub</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"Voice API 40+ 语言支持，延迟低到用户无感知。全球化产品终于不为语音能力发愁了。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(50,173,230,.2)">👩‍💻</div><div><div class="tc2-name">黄雅琳</div><div class="tc2-role">首席工程师 · GlobalApp</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"99.99% SLA 让我们和大客户谈合同底气十足，NOVA 是真正企业级的 AI 基础设施。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(191,90,242,.2)">👨‍💼</div><div><div class="tc2-name">赵文博</div><div class="tc2-role">CEO · EnterpriseAI</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"Fine-tune 定制专属客服模型，三个月满意度从 71% 提升到 93%，远超预期。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(48,209,88,.2)">👩‍💼</div><div><div class="tc2-name">孙嘉宁</div><div class="tc2-role">运营总监 · ServiceCo</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"NOVA Guard 让 UGC 平台实现实时内容安全，误判率不到 0.1%，终于可以放心扩量了。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(255,159,10,.2)">👨‍🎨</div><div><div class="tc2-name">刘天宇</div><div class="tc2-role">工程 VP · CreativeHub</div></div></div></div>
+      <div class="tc2"><div class="tc2-stars">★★★★★</div><p class="tc2-text">"Voice API 40+ 语言支持，延迟低到用户无感知。全球化产品终于不为语音能力发愁了。"</p><div class="tc2-auth"><div class="tc2-av" style="background:rgba(50,173,230,.2)">👩‍💻</div><div><div class="tc2-name">黄雅琳</div><div class="tc2-role">首席工程师 · GlobalApp</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PRICING ══ -->
+<section class="sec" id="pricing">
+  <div class="w">
+    <p class="ey r" style="text-align:center">定价方案</p>
+    <h2 class="sh r d1" style="text-align:center;max-width:none;margin:0 auto">透明定价，<br/><i>按需付费。</i></h2>
+    <div class="ptoggle r d2">
+      <span>按月付费</span>
+      <div class="psw" id="psw"><div class="psw-th"></div></div>
+      <span>按年付费</span>
+      <span class="psave">省 20%</span>
+    </div>
+    <div class="pcards">
+      <div class="pcard r">
+        <div class="p-tier">入门版</div>
+        <div class="p-price"><sup>¥</sup>0</div>
+        <div class="p-desc">永久免费 · 每月 100 万次调用</div>
+        <div class="p-hr"></div>
+        <ul class="p-feats">
+          <li><span class="pfy">✓</span>NOVA Core API</li>
+          <li><span class="pfy">✓</span>100 万 Token / 月</li>
+          <li><span class="pfy">✓</span>基础模型库（20+ 款）</li>
+          <li><span class="pfy">✓</span>社区技术支持</li>
+          <li class="dim"><span class="pfn">✗</span>自定义微调</li>
+          <li class="dim"><span class="pfn">✗</span>私有化部署</li>
+        </ul>
+        <a href="#" class="p-btn">免费开始</a>
+      </div>
+      <div class="pcard hot r d1">
+        <div class="hot-lbl">最受欢迎</div>
+        <div class="p-tier" style="color:rgba(100,165,250,.85)">专业版</div>
+        <div class="p-price"><sup>¥</sup><span id="pv">2,999</span></div>
+        <div class="p-desc">/ 月 · 10 亿 Token 额度</div>
+        <div class="p-hr"></div>
+        <ul class="p-feats">
+          <li><span class="pfy">✓</span>全产品 API 权限</li>
+          <li><span class="pfy">✓</span>10 亿 Token / 月</li>
+          <li><span class="pfy">✓</span>完整模型库（200+ 款）</li>
+          <li><span class="pfy">✓</span>Fine-tune Studio 完整功能</li>
+          <li><span class="pfy">✓</span>99.9% SLA + 优先支持</li>
+          <li class="dim"><span class="pfn">✗</span>私有化部署</li>
+        </ul>
+        <a href="#" class="p-btn">立即订阅</a>
+      </div>
+      <div class="pcard r d2">
+        <div class="p-tier">企业版</div>
+        <div class="p-price" style="font-size:34px;letter-spacing:-1px">定制报价</div>
+        <div class="p-desc">联系我们获取专属方案</div>
+        <div class="p-hr"></div>
+        <ul class="p-feats">
+          <li><span class="pfy">✓</span>专业版全部功能</li>
+          <li><span class="pfy">✓</span>无限 Token 调用</li>
+          <li><span class="pfy">✓</span>私有化 / 混合云部署</li>
+          <li><span class="pfy">✓</span>专属客户成功团队</li>
+          <li><span class="pfy">✓</span>合规审计 & 安全评估</li>
+          <li><span class="pfy">✓</span>99.99% SLA 保障</li>
+        </ul>
+        <a href="#" class="p-btn">联系销售</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TEAM ══ -->
+<section class="sec" id="team" style="background:rgba(5,5,8,.6)">
+  <div class="w">
+    <p class="ey r">创始团队</p>
+    <h2 class="sh r d1">来自顶尖 AI 实验室<br/><i>的世界级团队。</i></h2>
+    <p class="sp r d2">深度学习领域 50 年累计经验，曾主导 GPT、LLaMA、Gemini 等核心研发工作。</p>
+    <div class="team-grid">
+      <div class="tmcard r"><div class="tm-av" style="background:linear-gradient(135deg,rgba(0,113,227,.3),rgba(0,113,227,.08))">👨‍💻</div><div class="tm-name">陈立远</div><div class="tm-role">CEO & 联合创始人</div><div class="tm-chips"><span class="tm-chip">前 OpenAI</span><span class="tm-chip">斯坦福 PhD</span></div></div>
+      <div class="tmcard r d1"><div class="tm-av" style="background:linear-gradient(135deg,rgba(191,90,242,.3),rgba(191,90,242,.08))">👩‍🔬</div><div class="tm-name">林晓静</div><div class="tm-role">CTO & 联合创始人</div><div class="tm-chips"><span class="tm-chip">前 Google Brain</span><span class="tm-chip">MIT PhD</span></div></div>
+      <div class="tmcard r d2"><div class="tm-av" style="background:linear-gradient(135deg,rgba(50,173,230,.3),rgba(50,173,230,.08))">👨‍🔬</div><div class="tm-name">王思哲</div><div class="tm-role">首席科学家</div><div class="tm-chips"><span class="tm-chip">前 Meta AI</span><span class="tm-chip">CMU 博士</span></div></div>
+      <div class="tmcard r d3"><div class="tm-av" style="background:linear-gradient(135deg,rgba(48,209,88,.3),rgba(48,209,88,.08))">👩‍💼</div><div class="tm-name">赵雨桐</div><div class="tm-role">COO</div><div class="tm-chips"><span class="tm-chip">前阿里云 AI</span><span class="tm-chip">清华大学</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section class="sec" id="faq">
+  <div class="w">
+    <p class="ey r">常见问题</p>
+    <h2 class="sh r d1">你想知道的，<br/><i>都在这里。</i></h2>
+    <div class="faq-list r d2">
+      <div class="faq-item open">
+        <div class="faq-q">NOVA 和直接调用 OpenAI / Claude 有什么区别？<span class="faq-ic">+</span></div>
+        <div class="faq-ans">NOVA 不是转发代理。我们提供自研推理引擎、私有化部署、自定义微调、多模态统一 API 和企业级 SLA。对于有定制化、合规、成本控制需求的企业，NOVA 是真正的基础设施层选择，而非简单的 API 中转。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">数据安全和隐私如何保障？<span class="faq-ic">+</span></div>
+        <div class="faq-ans">所有传输使用 TLS 1.3 加密，推理过程不存储用户数据，通过 SOC2 Type II 认证。企业版支持完全私有化部署，数据物理隔离，满足金融、医疗等强合规场景。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">接入需要多少技术成本？<span class="faq-ic">+</span></div>
+        <div class="faq-ans">标准 REST API，5 分钟完成接入。提供 Python、Node.js、Go、Java 主流 SDK，以及 LangChain、LlamaIndex 框架原生集成，现有系统无需大幅改造。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">如何计费？有没有隐藏费用？<span class="faq-ic">+</span></div>
+        <div class="faq-ans">按 Token 用量计费，价格透明，官网实时可查。入门版永久免费，专业版月费固定含 10 亿 Token，超出按量计费。没有任何隐藏费用，账单精确到每一个 Token。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">支持哪些模型？可以用自己的模型吗？<span class="faq-ic">+</span></div>
+        <div class="faq-ans">支持 200+ 主流开源模型（LLaMA、Mistral、Qwen、Gemma 等），同时支持上传私有模型或通过 Fine-tune Studio 定制，部署与调用完全自主可控。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FINAL CTA ══ -->
+<div class="cta-final">
+  <h2 class="r">开始构建，<br/>从今天起。</h2>
+  <p class="r d1">免费注册，5 分钟接入，无需信用卡。<br/>30 天不满意，全额退款，没有任何问题。</p>
+  <div class="cta-btns r d2">
+    <a href="#" class="btn-p" style="font-size:17px;padding:16px 36px">免费开始使用</a>
+    <a href="#" class="btn-s" style="font-size:17px;padding:16px 32px">预约产品演示</a>
+  </div>
+  <p class="cta-note r d3">已有 5,000+ 家企业在使用 NOVA AI</p>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="ft">
+    <div class="ft-top">
+      <div class="ft-about">
+        <div class="fa-logo"><div class="fa-mark">N</div><span class="fa-name">NOVA AI</span></div>
+        <p>新一代 AI 基础设施，让每家公司都拥有 AI 超能力。</p>
+        <div class="ft-social">
+          <a href="#" class="ft-sc">𝕏</a>
+          <a href="#" class="ft-sc">⬡</a>
+          <a href="#" class="ft-sc">in</a>
+          <a href="#" class="ft-sc">▶</a>
+        </div>
+      </div>
+      <div class="ft-col"><h5>产品</h5><ul><li><a href="#">NOVA Core</a></li><li><a href="#">NOVA Vision</a></li><li><a href="#">NOVA Voice</a></li><li><a href="#">NOVA Guard</a></li><li><a href="#">NOVA Fine-tune</a></li><li><a href="#">NOVA Deploy</a></li></ul></div>
+      <div class="ft-col"><h5>开发者</h5><ul><li><a href="#">API 文档</a></li><li><a href="#">SDK 下载</a></li><li><a href="#">模型库</a></li><li><a href="#">GitHub</a></li><li><a href="#">社区论坛</a></li><li><a href="#">更新日志</a></li></ul></div>
+      <div class="ft-col"><h5>公司</h5><ul><li><a href="#">关于我们</a></li><li><a href="#">技术博客</a></li><li><a href="#">招聘</a></li><li><a href="#">新闻中心</a></li><li><a href="#">合作伙伴</a></li><li><a href="#">联系我们</a></li></ul></div>
+      <div class="ft-col"><h5>法律</h5><ul><li><a href="#">隐私政策</a></li><li><a href="#">服务条款</a></li><li><a href="#">SLA 协议</a></li><li><a href="#">安全合规</a></li><li><a href="#">Cookie 设置</a></li></ul></div>
+    </div>
+    <div class="ft-bot">
+      <span>© 2026 NOVA AI Technologies, Inc. 保留所有权利。</span>
+      <div style="display:flex;gap:16px"><a href="#">沪ICP备2026000001号</a><a href="#">隐私</a><a href="#">条款</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// reveal
+const io = new IntersectionObserver(e => {
+  e.forEach(x => { if(x.isIntersecting){ x.target.classList.add('on'); io.unobserve(x.target); }});
+}, {threshold:.06});
+document.querySelectorAll('.r').forEach(el => io.observe(el));
+
+// nav
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').style.background =
+    scrollY > 20 ? 'rgba(0,0,0,.92)' : 'rgba(0,0,0,.68)';
+}, {passive:true});
+
+// case tabs
+document.querySelectorAll('.ctab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.ctab').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('.cpanel').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    document.getElementById(t.dataset.p).classList.add('on');
+  });
+});
+
+// tech accordion
+document.querySelectorAll('.ti').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.ti').forEach(x => x.classList.remove('on'));
+    item.classList.add('on');
+    document.getElementById('tv-ico').textContent = item.dataset.icon;
+    document.getElementById('tv-lbl').textContent = item.dataset.label;
+    document.getElementById('tech-vis').style.boxShadow = `inset 0 0 120px ${item.dataset.glow}`;
+  });
+});
+
+// pricing toggle
+const psw = document.getElementById('psw');
+const pv  = document.getElementById('pv');
+psw.addEventListener('click', () => {
+  psw.classList.toggle('on');
+  pv.textContent = psw.classList.contains('on') ? '2,399' : '2,999';
+});
+
+// faq
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const was = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if(!was) item.classList.add('open');
+  });
+});
+
+// ── 登录弹窗 ──
+const loginBtn = document.querySelector('.nav-login');
+const loginOverlay = document.getElementById('login-overlay');
+const loginClose = document.getElementById('login-close');
+const loginForm = document.getElementById('login-form');
+const loginToggle = document.getElementById('login-toggle');
+const loginTitle = document.getElementById('login-title');
+const loginSubmit = document.getElementById('login-submit');
+let isRegister = false;
+
+function openLogin() {
+  loginOverlay.classList.add('on');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => loginOverlay.querySelector('input[type="email"]').focus(), 80);
+}
+function closeLogin() {
+  loginOverlay.classList.remove('on');
+  document.body.style.overflow = '';
+  loginForm.reset();
+  document.getElementById('login-err').textContent = '';
+}
+
+loginBtn.addEventListener('click', e => { e.preventDefault(); openLogin(); });
+loginClose.addEventListener('click', closeLogin);
+loginOverlay.addEventListener('click', e => { if (e.target === loginOverlay) closeLogin(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLogin(); });
+
+loginToggle.addEventListener('click', () => {
+  isRegister = !isRegister;
+  loginTitle.textContent = isRegister ? '创建账户' : '登录';
+  loginSubmit.textContent = isRegister ? '注册' : '登录';
+  loginToggle.textContent = isRegister ? '已有账户？去登录' : '没有账户？免费注册';
+  document.getElementById('login-confirm-wrap').style.display = isRegister ? 'flex' : 'none';
+  document.getElementById('login-err').textContent = '';
+});
+
+loginForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+
+  if (isRegister) {
+    const confirm = document.getElementById('login-confirm').value;
+    if (pass !== confirm) { errEl.textContent = '两次密码不一致'; return; }
+    if (pass.length < 6)  { errEl.textContent = '密码至少 6 位'; return; }
+    // 演示用：注册成功提示
+    showToast('注册成功！欢迎加入 NOVA AI 🎉');
+    closeLogin();
+  } else {
+    // 演示用：固定账号验证（正式接入后替换为 API）
+    if (email === 'demo@nova.ai' && pass === 'nova2025') {
+      showToast('登录成功，欢迎回来 👋');
+      loginBtn.textContent = '退出';
+      loginBtn.onclick = (ev) => { ev.preventDefault(); loginBtn.textContent = '登录'; loginBtn.onclick = null; loginBtn.addEventListener('click', e2 => { e2.preventDefault(); openLogin(); }); showToast('已退出登录'); };
+      closeLogin();
+    } else {
+      errEl.textContent = '邮箱或密码错误（演示账号：demo@nova.ai / nova2025）';
+    }
+  }
+});
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.15);color:#f5f5f7;padding:10px 22px;border-radius:980px;font-size:13px;z-index:9999;pointer-events:none;transition:opacity .4s';
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2500);
+}
+</script>
+
+<!-- ── 登录弹窗 HTML ── -->
+<div id="login-overlay" style="position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#111118;border:1px solid rgba(255,255,255,.1);border-radius:20px;width:min(420px,100%);padding:36px 32px;position:relative;animation:mIn .2s ease;box-shadow:0 32px 80px rgba(0,0,0,.6)">
+    <button id="login-close" style="position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.07);border:none;cursor:pointer;color:#86868b;font-size:16px;display:grid;place-items:center;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">✕</button>
+
+    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0071e3,#bf5af2);display:grid;place-items:center;font-size:20px;font-weight:900;color:#fff;margin:0 auto 20px;box-shadow:0 0 24px rgba(0,113,227,.4)">N</div>
+    <h2 id="login-title" style="font-size:20px;font-weight:700;letter-spacing:-.4px;text-align:center;margin-bottom:6px">登录</h2>
+    <p style="font-size:13px;color:#86868b;text-align:center;margin-bottom:24px">登录你的 NOVA AI 账户</p>
+
+    <form id="login-form" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:12px;color:#86868b">邮箱</label>
+        <input id="login-email" type="email" placeholder="you@example.com" required style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:10px 14px;color:#f5f5f7;font-size:13px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#0071e3'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:12px;color:#86868b">密码</label>
+        <input id="login-pass" type="password" placeholder="••••••••" required style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:10px 14px;color:#f5f5f7;font-size:13px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#0071e3'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+      </div>
+      <div id="login-confirm-wrap" style="display:none;flex-direction:column;gap:6px">
+        <label style="font-size:12px;color:#86868b">确认密码</label>
+        <input id="login-confirm" type="password" placeholder="••••••••" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:10px 14px;color:#f5f5f7;font-size:13px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#0071e3'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+      </div>
+      <p id="login-err" style="color:#ff453a;font-size:12px;min-height:16px;text-align:center"></p>
+      <button id="login-submit" type="submit" style="background:#0071e3;color:#fff;border:none;border-radius:9px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;transition:filter .2s,transform .1s;margin-top:4px" onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter=''" onmousedown="this.style.transform='scale(.97)'" onmouseup="this.style.transform=''">登录</button>
+    </form>
+
+    <p style="text-align:center;margin-top:18px;font-size:13px;color:#86868b">
+      <a id="login-toggle" href="#" style="color:#0071e3;text-decoration:none" onclick="event.preventDefault()">没有账户？免费注册</a>
+    </p>
+  </div>
+</div>
+
+<style>
+#login-overlay.on{display:flex}
+@keyframes mIn{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+</style>
+</body>
+</html>
