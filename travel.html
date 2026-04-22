@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>云境旅游 · 让每一次出发都值得铭记</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --f:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --gold:#c9a84c;--gold2:#e8c87a;--dark:#0d0d0d;--dark2:#141414;--dark3:#1a1a1a;
+  --white:#fff;--gray:#888;--light:#f8f6f1;--border:rgba(255,255,255,.08);
+  --text:#222;--subtext:#666;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--f);color:var(--text);background:var(--white);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+button{cursor:pointer;font-family:var(--f)}
+::selection{background:var(--gold);color:#fff}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 60px;height:72px;display:flex;align-items:center;justify-content:space-between;transition:all .4s}
+nav.scrolled{background:rgba(13,13,13,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:12px}
+.nav-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#a07830);display:grid;place-items:center;font-size:18px}
+.nav-name{font-size:18px;font-weight:800;color:var(--white);letter-spacing:-.5px}
+.nav-links{display:flex;align-items:center;gap:36px}
+.nav-links a{font-size:14px;color:rgba(255,255,255,.75);font-weight:500;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .25s}
+.nav-links a:hover{color:var(--white)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.nav-cta{padding:9px 22px;border-radius:8px;background:var(--gold);color:var(--dark);font-size:13px;font-weight:700;transition:all .2s;border:none}
+.nav-cta:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,.4)}
+.nav-mobile{display:none}
+
+/* ── HERO ── */
+#hero{position:relative;height:100vh;min-height:640px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0d1b2a 0%,#1a2f4a 35%,#0f2d1f 70%,#1a1a0d 100%);z-index:0}
+.hero-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 60%, rgba(201,168,76,.12) 0%, transparent 60%),radial-gradient(ellipse at 80% 20%, rgba(32,120,80,.1) 0%, transparent 50%);z-index:1}
+/* 装饰性光斑 */
+.hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.08),transparent 70%);top:-100px;right:-100px;z-index:1;animation:glow 8s ease-in-out infinite alternate}
+@keyframes glow{from{transform:scale(1) translate(0,0)}to{transform:scale(1.15) translate(-30px,40px)}}
+/* 漂浮卡片 */
+.hero-float{position:absolute;bottom:15%;right:8%;z-index:3;background:rgba(255,255,255,.08);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:18px 24px;animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero-float .hf-num{font-size:32px;font-weight:800;color:var(--gold);line-height:1}
+.hero-float .hf-label{font-size:12px;color:rgba(255,255,255,.6);margin-top:4px}
+.hero-float2{position:absolute;top:25%;left:6%;z-index:3;background:rgba(255,255,255,.06);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 18px;animation:float 7s ease-in-out infinite .5s}
+.hero-float2 .hf2-row{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8);font-size:13px}
+.hero-float2 .hf2-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero-content{position:relative;z-index:2;text-align:center;padding:0 20px;max-width:860px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);font-size:12px;color:var(--gold2);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:28px}
+.hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block}
+.hero-content h1{font-size:clamp(38px,6vw,80px);font-weight:900;color:var(--white);line-height:1.1;letter-spacing:-2px;margin-bottom:22px}
+.hero-content h1 em{font-style:normal;background:linear-gradient(90deg,var(--gold),var(--gold2),#fff8e7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-content p{font-size:18px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:40px;max-width:540px;margin-left:auto;margin-right:auto}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-gold{padding:14px 34px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#a07830);color:var(--dark);font-size:15px;font-weight:700;border:none;transition:all .2s;letter-spacing:.3px}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,168,76,.4)}
+.btn-outline{padding:14px 34px;border-radius:10px;border:1px solid rgba(255,255,255,.25);color:var(--white);font-size:15px;font-weight:600;background:rgba(255,255,255,.06);backdrop-filter:blur(8px);transition:all .2s}
+.btn-outline:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4)}
+.hero-stats{position:absolute;bottom:0;left:0;right:0;z-index:3;display:flex;justify-content:center;gap:0;border-top:1px solid rgba(255,255,255,.06)}
+.hero-stat{flex:1;max-width:220px;padding:24px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.3);backdrop-filter:blur(12px)}
+.hero-stat:last-child{border-right:none}
+.hero-stat .hs-num{font-size:28px;font-weight:800;color:var(--gold);letter-spacing:-1px}
+.hero-stat .hs-label{font-size:12px;color:rgba(255,255,255,.45);margin-top:4px;letter-spacing:.3px}
+
+/* ── SECTION COMMON ── */
+section{padding:100px 60px}
+.sec-label{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.sec-title{font-size:clamp(28px,3.5vw,46px);font-weight:900;letter-spacing:-1.5px;line-height:1.15;margin-bottom:16px}
+.sec-sub{font-size:17px;color:var(--subtext);line-height:1.7;max-width:520px}
+.sec-head{margin-bottom:56px}
+.sec-head.center{text-align:center}
+.sec-head.center .sec-sub{margin:0 auto}
+
+/* ── DESTINATIONS ── */
+#destinations{background:var(--light)}
+.dest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.dest-card{position:relative;border-radius:20px;overflow:hidden;cursor:pointer;group}
+.dest-card .dc-img{width:100%;aspect-ratio:3/4;object-fit:cover;transition:transform .6s}
+.dest-card:first-child{grid-row:span 2}
+.dest-card:first-child .dc-img{aspect-ratio:auto;height:100%}
+.dest-card:hover .dc-img{transform:scale(1.06)}
+/* 用纯CSS渐变色块模拟图片（无需外部图片资源） */
+.dc-img{border-radius:20px}
+.dest-card:nth-child(1) .dc-img{background:linear-gradient(160deg,#1a3a2a 0%,#2d6a4f 30%,#52b788 60%,#b7e4c7 100%)}
+.dest-card:nth-child(2) .dc-img{background:linear-gradient(160deg,#0a1628 0%,#1a3a5c 40%,#2196a0 70%,#64c8d4 100%)}
+.dest-card:nth-child(3) .dc-img{background:linear-gradient(160deg,#1a0a00 0%,#8b4513 40%,#cd853f 70%,#f4a460 100%)}
+.dest-card:nth-child(4) .dc-img{background:linear-gradient(160deg,#0d0d2b 0%,#1a1a6e 40%,#6060d0 70%,#c8a0f0 100%)}
+.dc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.1) 60%,transparent 100%);border-radius:20px;display:flex;flex-direction:column;justify-content:flex-end;padding:24px}
+.dc-country{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--gold2);text-transform:uppercase;margin-bottom:6px}
+.dc-name{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-.5px;margin-bottom:8px}
+.dc-desc{font-size:13px;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:14px}
+.dc-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:rgba(201,168,76,.2);border:1px solid rgba(201,168,76,.3);font-size:11px;color:var(--gold2);font-weight:600}
+/* 装饰图案（波浪/山/海） */
+.dc-deco{position:absolute;top:20px;right:20px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:24px}
+
+/* ── PACKAGES ── */
+#packages{background:var(--white)}
+.pkg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.pkg-card{border-radius:20px;overflow:hidden;border:1px solid #eee;transition:all .3s;background:var(--white)}
+.pkg-card:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,.1);border-color:transparent}
+.pkg-img{height:220px;position:relative;overflow:hidden}
+.pkg-card:nth-child(1) .pkg-img{background:linear-gradient(135deg,#0f2d1f,#2d6a4f,#52b788)}
+.pkg-card:nth-child(2) .pkg-img{background:linear-gradient(135deg,#0d1b2a,#1a3a5c,#2196a0)}
+.pkg-card:nth-child(3) .pkg-img{background:linear-gradient(135deg,#1a0a00,#8b3a13,#e07840)}
+.pkg-badge{position:absolute;top:16px;left:16px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px}
+.pkg-badge.hot{background:rgba(255,80,60,.9);color:#fff}
+.pkg-badge.new{background:rgba(48,200,120,.9);color:#fff}
+.pkg-badge.top{background:rgba(201,168,76,.9);color:#000}
+.pkg-days{position:absolute;bottom:16px;right:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-radius:8px;padding:6px 12px;color:rgba(255,255,255,.9);font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.15)}
+.pkg-deco{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:64px;opacity:.25;pointer-events:none}
+.pkg-body{padding:24px}
+.pkg-body h3{font-size:18px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px}
+.pkg-body p{font-size:13px;color:var(--subtext);line-height:1.6;margin-bottom:16px}
+.pkg-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.pkg-tag{padding:3px 10px;border-radius:5px;font-size:11px;background:#f5f5f5;color:#666;font-weight:600}
+.pkg-footer{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid #f0f0f0}
+.pkg-price{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:-.5px}
+.pkg-price small{font-size:13px;font-weight:500;color:var(--gray)}
+.pkg-btn{padding:8px 20px;border-radius:8px;background:var(--dark);color:var(--white);font-size:13px;font-weight:600;border:none;transition:all .2s}
+.pkg-btn:hover{background:var(--gold);color:var(--dark)}
+
+/* ── SERVICES ── */
+#services{background:var(--dark2)}
+#services .sec-label{color:var(--gold)}
+#services .sec-title{color:var(--white)}
+#services .sec-sub{color:rgba(255,255,255,.5)}
+.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.svc-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;padding:32px 24px;transition:all .3s;cursor:pointer}
+.svc-card:hover{background:rgba(201,168,76,.07);border-color:rgba(201,168,76,.3);transform:translateY(-4px)}
+.svc-icon{width:54px;height:54px;border-radius:14px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2);display:grid;place-items:center;font-size:22px;margin-bottom:22px;transition:all .3s}
+.svc-card:hover .svc-icon{background:rgba(201,168,76,.22);border-color:rgba(201,168,76,.4)}
+.svc-card h3{font-size:17px;font-weight:700;color:var(--white);margin-bottom:10px;letter-spacing:-.3px}
+.svc-card p{font-size:13px;color:rgba(255,255,255,.45);line-height:1.7}
+
+/* ── TESTIMONIALS ── */
+#reviews{background:var(--light)}
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.rev-card{background:var(--white);border-radius:20px;padding:32px;border:1px solid #eee;transition:all .3s}
+.rev-card:hover{box-shadow:0 16px 40px rgba(0,0,0,.08);transform:translateY(-3px)}
+.rev-stars{display:flex;gap:3px;margin-bottom:16px}
+.rev-stars span{color:var(--gold);font-size:15px}
+.rev-text{font-size:14px;color:#444;line-height:1.8;margin-bottom:24px;font-style:italic}
+.rev-author{display:flex;align-items:center;gap:12px}
+.rev-avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:800;color:var(--white)}
+.rev-avatar.a1{background:linear-gradient(135deg,#667eea,#764ba2)}
+.rev-avatar.a2{background:linear-gradient(135deg,#f093fb,#f5576c)}
+.rev-avatar.a3{background:linear-gradient(135deg,#4facfe,#00f2fe)}
+.rev-author-info strong{display:block;font-size:14px;font-weight:700;margin-bottom:2px}
+.rev-author-info span{font-size:12px;color:var(--gray)}
+
+/* ── BANNER ── */
+#cta-banner{background:linear-gradient(135deg,var(--gold) 0%,#8b6914 50%,#c9a84c 100%);padding:80px 60px;text-align:center;position:relative;overflow:hidden}
+#cta-banner::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+#cta-banner h2{font-size:clamp(28px,4vw,52px);font-weight:900;color:var(--dark);letter-spacing:-1.5px;margin-bottom:16px;position:relative}
+#cta-banner p{font-size:17px;color:rgba(0,0,0,.6);margin-bottom:36px;position:relative}
+#cta-banner .btn-dark{padding:14px 40px;border-radius:10px;background:var(--dark);color:var(--white);font-size:15px;font-weight:700;border:none;transition:all .2s;position:relative}
+#cta-banner .btn-dark:hover{background:#111;transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+
+/* ── CONTACT ── */
+#contact{background:var(--dark);padding:100px 60px}
+#contact .sec-label{color:var(--gold)}
+#contact .sec-title{color:var(--white)}
+#contact .sec-sub{color:rgba(255,255,255,.45)}
+.contact-wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.contact-info{display:flex;flex-direction:column;gap:28px;margin-top:20px}
+.ci-item{display:flex;gap:16px;align-items:flex-start}
+.ci-icon{width:46px;height:46px;border-radius:12px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.ci-item strong{display:block;font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
+.ci-item span{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6}
+.contact-form{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:36px}
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cf-field{margin-bottom:16px}
+.cf-field label{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:8px;letter-spacing:.3px;text-transform:uppercase}
+.cf-field input,.cf-field select,.cf-field textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;color:var(--white);font-size:14px;font-family:var(--f);outline:none;transition:border-color .2s}
+.cf-field input::placeholder,.cf-field textarea::placeholder{color:rgba(255,255,255,.25)}
+.cf-field input:focus,.cf-field select:focus,.cf-field textarea:focus{border-color:rgba(201,168,76,.5)}
+.cf-field select option{background:var(--dark3);color:var(--white)}
+.cf-field textarea{resize:vertical;min-height:100px;line-height:1.6}
+.cf-submit{width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#a07830);color:var(--dark);font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .2s;margin-top:4px}
+.cf-submit:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.3)}
+
+/* ── FOOTER ── */
+footer{background:var(--dark2);padding:60px 60px 36px;border-top:1px solid var(--border)}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.ft-brand .fb-logo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.ft-brand .fb-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gold),#a07830);display:grid;place-items:center;font-size:16px}
+.ft-brand .fb-name{font-size:17px;font-weight:800;color:var(--white)}
+.ft-brand p{font-size:13px;color:rgba(255,255,255,.35);line-height:1.7;max-width:280px;margin-bottom:24px}
+.ft-social{display:flex;gap:10px}
+.ft-social a{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid var(--border);display:grid;place-items:center;font-size:14px;transition:all .2s;color:rgba(255,255,255,.5)}
+.ft-social a:hover{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.3);color:var(--gold2)}
+.ft-col h4{font-size:13px;font-weight:700;color:var(--white);margin-bottom:18px;letter-spacing:.3px}
+.ft-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.ft-col ul li a{font-size:13px;color:rgba(255,255,255,.35);transition:color .2s}
+.ft-col ul li a:hover{color:var(--gold2)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:28px;display:flex;align-items:center;justify-content:space-between}
+.footer-bottom p{font-size:12px;color:rgba(255,255,255,.25)}
+.footer-bottom .fb-links{display:flex;gap:20px}
+.footer-bottom .fb-links a{font-size:12px;color:rgba(255,255,255,.25);transition:color .2s}
+.footer-bottom .fb-links a:hover{color:rgba(255,255,255,.5)}
+
+/* ── SCROLL TO TOP ── */
+#sto{position:fixed;bottom:32px;right:32px;z-index:800;width:44px;height:44px;border-radius:12px;background:var(--gold);color:var(--dark);border:none;font-size:18px;display:grid;place-items:center;cursor:pointer;transition:all .3s;opacity:0;transform:translateY(16px);pointer-events:none}
+#sto.show{opacity:1;transform:translateY(0);pointer-events:all}
+#sto:hover{background:var(--gold2);transform:translateY(-2px)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);z-index:9999;background:rgba(13,13,13,.92);color:var(--white);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:500;border:1px solid var(--border);backdrop-filter:blur(12px);transition:transform .35s,opacity .35s;opacity:0}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ── ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+.reveal-l{opacity:0;transform:translateX(-30px);transition:opacity .7s ease,transform .7s ease}
+.reveal-l.in{opacity:1;transform:translateX(0)}
+.reveal-r{opacity:0;transform:translateX(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal-r.in{opacity:1;transform:translateX(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  section{padding:80px 36px}
+  nav{padding:0 36px}
+  .dest-grid{grid-template-columns:1fr 1fr}
+  .dest-card:first-child{grid-row:span 1}
+  .svc-grid{grid-template-columns:1fr 1fr}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .contact-wrap{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  nav{padding:0 20px}
+  section{padding:64px 20px}
+  .nav-links{display:none}
+  .nav-mobile{display:flex;align-items:center;gap:10px}
+  .dest-grid,.pkg-grid,.rev-grid{grid-template-columns:1fr}
+  .svc-grid{grid-template-columns:1fr 1fr}
+  .footer-top{grid-template-columns:1fr}
+  #cta-banner{padding:64px 24px}
+  .hero-float,.hero-float2{display:none}
+  .hero-stats{flex-wrap:wrap}
+  .hero-stat{min-width:50%;border-right:none;border-top:1px solid rgba(255,255,255,.06)}
+  .cf-row{grid-template-columns:1fr}
+  footer{padding:48px 24px 32px}
+  .footer-bottom{flex-direction:column;gap:16px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <div class="nav-mark">✦</div>
+    <span class="nav-name">云境旅游</span>
+  </div>
+  <div class="nav-links">
+    <a href="#destinations">目的地</a>
+    <a href="#packages">精选线路</a>
+    <a href="#services">我们的服务</a>
+    <a href="#reviews">旅客评价</a>
+    <a href="#contact">联系我们</a>
+  </div>
+  <button class="nav-cta" onclick="scrollTo({top:document.getElementById('contact').offsetTop,behavior:'smooth'})">立即咨询</button>
+  <div class="nav-mobile">
+    <button class="nav-cta" onclick="scrollTo({top:document.getElementById('contact').offsetTop,behavior:'smooth'})">咨询</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-float">
+    <div class="hf-num">10,000+</div>
+    <div class="hf-label">幸福旅行者</div>
+  </div>
+  <div class="hero-float2">
+    <div class="hf2-row"><span class="hf2-dot"></span> 当前有 34 人正在浏览</div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge"><span></span> 2025 年度最佳旅行品牌</div>
+    <h1>让每一次出发<br/>都成为<em>传奇</em></h1>
+    <p>云境旅游，专注高品质定制旅行。从云南秘境到欧洲古城，我们为你的每一程旅途，注入独一无二的温度与深度。</p>
+    <div class="hero-btns">
+      <button class="btn-gold" onclick="scrollTo({top:document.getElementById('packages').offsetTop,behavior:'smooth'})">探索线路</button>
+      <button class="btn-outline" onclick="scrollTo({top:document.getElementById('destinations').offsetTop,behavior:'smooth'})">🗺 查看目的地</button>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hs-num">10,000<span style="font-size:18px">+</span></div><div class="hs-label">服务旅客</div></div>
+    <div class="hero-stat"><div class="hs-num">120<span style="font-size:18px">+</span></div><div class="hs-label">精选目的地</div></div>
+    <div class="hero-stat"><div class="hs-num">98<span style="font-size:14px">%</span></div><div class="hs-label">好评率</div></div>
+    <div class="hero-stat"><div class="hs-num">8</div><div class="hs-label">年专注旅行</div></div>
+  </div>
+</section>
+
+<!-- DESTINATIONS -->
+<section id="destinations">
+  <div class="sec-head reveal">
+    <div class="sec-label">精选目的地</div>
+    <h2 class="sec-title">世界等着你去发现</h2>
+    <p class="sec-sub">我们精选全球 120+ 个目的地，每一处都经过团队实地踩点，只推荐值得你去的地方。</p>
+  </div>
+  <div class="dest-grid">
+    <div class="dest-card reveal">
+      <div class="dc-img" style="height:100%;min-height:400px"></div>
+      <div class="dc-deco">🌿</div>
+      <div class="dc-overlay">
+        <div class="dc-country">中国 · China</div>
+        <div class="dc-name">云南·香格里拉</div>
+        <div class="dc-desc">雪山、草甸、藏寨，高原上最接近天堂的地方</div>
+        <div class="dc-tag">✦ 自然秘境</div>
+      </div>
+    </div>
+    <div class="dest-card reveal" style="transition-delay:.1s">
+      <div class="dc-img" style="aspect-ratio:16/9"></div>
+      <div class="dc-deco">🌊</div>
+      <div class="dc-overlay">
+        <div class="dc-country">马尔代夫 · Maldives</div>
+        <div class="dc-name">马尔代夫</div>
+        <div class="dc-desc">碧海蓝天，水上屋别墅，蜜月首选</div>
+        <div class="dc-tag">✦ 海岛天堂</div>
+      </div>
+    </div>
+    <div class="dest-card reveal" style="transition-delay:.2s">
+      <div class="dc-img" style="aspect-ratio:16/9"></div>
+      <div class="dc-deco">🏜</div>
+      <div class="dc-overlay">
+        <div class="dc-country">摩洛哥 · Morocco</div>
+        <div class="dc-name">摩洛哥·撒哈拉</div>
+        <div class="dc-desc">漫漫黄沙，驼铃声声，最浪漫的沙漠之旅</div>
+        <div class="dc-tag">✦ 异域探险</div>
+      </div>
+    </div>
+    <div class="dest-card reveal" style="transition-delay:.3s">
+      <div class="dc-img" style="aspect-ratio:16/9"></div>
+      <div class="dc-deco">🏔</div>
+      <div class="dc-overlay">
+        <div class="dc-country">冰岛 · Iceland</div>
+        <div class="dc-name">冰岛·极光之旅</div>
+        <div class="dc-desc">北极圈下的奇幻光影，此生必看的天象</div>
+        <div class="dc-tag">✦ 极地探索</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PACKAGES -->
+<section id="packages">
+  <div class="sec-head center reveal">
+    <div class="sec-label">精选线路</div>
+    <h2 class="sec-title">为你量身定制的旅程</h2>
+    <p class="sec-sub">从轻松休闲到深度探险，我们有最适合你的那一款。</p>
+  </div>
+  <div class="pkg-grid">
+    <div class="pkg-card reveal">
+      <div class="pkg-img">
+        <div class="pkg-deco">🏔</div>
+        <span class="pkg-badge hot">🔥 爆款</span>
+        <span class="pkg-days">7天6晚</span>
+      </div>
+      <div class="pkg-body">
+        <h3>云南深度探秘之旅</h3>
+        <p>丽江古城、玉龙雪山、泸沽湖、香格里拉，一次走遍云南精华。专属导游，小团出行。</p>
+        <div class="pkg-tags">
+          <span class="pkg-tag">小团精品</span>
+          <span class="pkg-tag">含早餐</span>
+          <span class="pkg-tag">含接送</span>
+          <span class="pkg-tag">摄影指导</span>
+        </div>
+        <div class="pkg-footer">
+          <div class="pkg-price">¥3,980<small>/人</small></div>
+          <button class="pkg-btn" onclick="showToast('已为您添加到询价列表')">立即咨询</button>
+        </div>
+      </div>
+    </div>
+    <div class="pkg-card reveal" style="transition-delay:.1s">
+      <div class="pkg-img">
+        <div class="pkg-deco">🌊</div>
+        <span class="pkg-badge top">⭐ 精选</span>
+        <span class="pkg-days">5天4晚</span>
+      </div>
+      <div class="pkg-body">
+        <h3>马尔代夫蜜月专属套餐</h3>
+        <p>水上别墅、私人海滩、烛光晚餐、潜水浮潜，为你的爱情打造最完美的注脚。</p>
+        <div class="pkg-tags">
+          <span class="pkg-tag">水上别墅</span>
+          <span class="pkg-tag">蜜月专属</span>
+          <span class="pkg-tag">含全餐</span>
+          <span class="pkg-tag">机票含税</span>
+        </div>
+        <div class="pkg-footer">
+          <div class="pkg-price">¥12,800<small>/人</small></div>
+          <button class="pkg-btn" onclick="showToast('已为您添加到询价列表')">立即咨询</button>
+        </div>
+      </div>
+    </div>
+    <div class="pkg-card reveal" style="transition-delay:.2s">
+      <div class="pkg-img">
+        <div class="pkg-deco">🌌</div>
+        <span class="pkg-badge new">✨ 新上线</span>
+        <span class="pkg-days">10天9晚</span>
+      </div>
+      <div class="pkg-body">
+        <h3>冰岛极光深度游</h3>
+        <p>雷克雅未克、黄金圈、杰古沙龙冰河湖，赶上极光季，亲眼目睹这场大自然的灯光秀。</p>
+        <div class="pkg-tags">
+          <span class="pkg-tag">极光保障</span>
+          <span class="pkg-tag">小团定制</span>
+          <span class="pkg-tag">含签证</span>
+          <span class="pkg-tag">摄影师随行</span>
+        </div>
+        <div class="pkg-footer">
+          <div class="pkg-price">¥21,500<small>/人</small></div>
+          <button class="pkg-btn" onclick="showToast('已为您添加到询价列表')">立即咨询</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:48px" class="reveal">
+    <button class="btn-gold" style="font-size:15px;padding:14px 40px" onclick="showToast('更多线路即将上线，请留下联系方式')">查看全部线路 →</button>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="sec-head center reveal">
+    <div class="sec-label">我们的服务</div>
+    <h2 class="sec-title" style="color:var(--white)">全程无忧，交给我们</h2>
+    <p class="sec-sub" style="color:rgba(255,255,255,.45);margin:0 auto">从出发前的规划到归途后的回忆整理，每一个环节我们都认真对待。</p>
+  </div>
+  <div class="svc-grid">
+    <div class="svc-card reveal">
+      <div class="svc-icon">🗺</div>
+      <h3>深度定制行程</h3>
+      <p>专属顾问一对一沟通，根据你的时间、预算、偏好，量身打造独一无二的旅行方案。</p>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.1s">
+      <div class="svc-icon">✈️</div>
+      <h3>机票·签证代办</h3>
+      <p>全球机票比价、签证材料准备、行前攻略，让你出发前就万事俱备。</p>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.2s">
+      <div class="svc-icon">🏨</div>
+      <h3>精品酒店甄选</h3>
+      <p>深度评测百余家精品酒店，从奢华度假村到特色民宿，只选最适合你的那一家。</p>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.3s">
+      <div class="svc-icon">🔒</div>
+      <h3>全程安全保障</h3>
+      <p>旅行保险、24小时紧急联络、应急预案，让你和家人放心出发，平安归来。</p>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.1s">
+      <div class="svc-icon">📸</div>
+      <h3>旅行摄影服务</h3>
+      <p>专业摄影师随行，在最美的光线下，定格你最真实的旅途瞬间。</p>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.2s">
+      <div class="svc-icon">🌐</div>
+      <h3>本地向导带队</h3>
+      <p>精通当地文化与语言的本地向导，带你走进游客踩不到的秘境。</p>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.3s">
+      <div class="svc-icon">🍽</div>
+      <h3>美食体验规划</h3>
+      <p>从当地街头小吃到米其林餐厅，我们帮你找到最值得一吃的每一口。</p>
+    </div>
+    <div class="svc-card reveal" style="transition-delay:.4s">
+      <div class="svc-icon">🎒</div>
+      <h3>行后服务跟进</h3>
+      <p>旅途结束不是终点。我们整理行程照片、收集反馈，为下一次出发做好准备。</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="reviews">
+  <div class="sec-head center reveal">
+    <div class="sec-label">旅客好评</div>
+    <h2 class="sec-title">他们走过，这样说</h2>
+  </div>
+  <div class="rev-grid">
+    <div class="rev-card reveal">
+      <div class="rev-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="rev-text">"云南那趟旅行是我这几年最难忘的经历。导游特别专业，行程安排得很舒服，不赶不拖，每一个景点都有足够的时间好好感受。强烈推荐！"</p>
+      <div class="rev-author">
+        <div class="rev-avatar a1">林</div>
+        <div class="rev-author-info">
+          <strong>林晓婷</strong>
+          <span>上海 · 云南深度7日游</span>
+        </div>
+      </div>
+    </div>
+    <div class="rev-card reveal" style="transition-delay:.1s">
+      <div class="rev-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="rev-text">"结婚5周年纪念日，选了马尔代夫蜜月套餐。水上屋的日落我永远忘不了，感谢云境帮我们安排了那顿惊喜烛光晚餐，老婆感动哭了。"</p>
+      <div class="rev-author">
+        <div class="rev-avatar a2">陈</div>
+        <div class="rev-author-info">
+          <strong>陈建国</strong>
+          <span>深圳 · 马尔代夫蜜月5日</span>
+        </div>
+      </div>
+    </div>
+    <div class="rev-card reveal" style="transition-delay:.2s">
+      <div class="rev-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="rev-text">"冰岛极光之旅超出预期！极光保障承诺是真实的，第三天晚上我们真的看到了满天绿光。随行摄影师帮我拍的照片已经冲印挂在客厅了。"</p>
+      <div class="rev-author">
+        <div class="rev-avatar a3">张</div>
+        <div class="rev-author-info">
+          <strong>张雨欣</strong>
+          <span>北京 · 冰岛极光10日游</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<div id="cta-banner" class="reveal">
+  <h2>你的下一段旅程，从这里开始</h2>
+  <p>限时优惠：2025年出发，立减 ¥500。名额有限，先到先得。</p>
+  <button class="btn-dark" onclick="scrollTo({top:document.getElementById('contact').offsetTop,behavior:'smooth'})">免费获取行程方案</button>
+</div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-wrap">
+    <div>
+      <div class="sec-label reveal-l">联系我们</div>
+      <h2 class="sec-title reveal-l" style="color:var(--white);margin-bottom:16px">随时欢迎<br/>与我们聊聊</h2>
+      <p class="sec-sub reveal-l">无论你是想咨询某条线路，还是有完全不同的旅行想法，我们都愿意倾听，并为你找到最合适的方案。</p>
+      <div class="contact-info">
+        <div class="ci-item reveal-l">
+          <div class="ci-icon">📞</div>
+          <div>
+            <strong>电话 / 微信</strong>
+            <span>400-888-8888（工作日 9:00–21:00）<br/>微信同号，扫码加好友</span>
+          </div>
+        </div>
+        <div class="ci-item reveal-l" style="transition-delay:.1s">
+          <div class="ci-icon">📧</div>
+          <div>
+            <strong>邮箱</strong>
+            <span>hello@yunjingtravel.com<br/>通常在 2 小时内回复</span>
+          </div>
+        </div>
+        <div class="ci-item reveal-l" style="transition-delay:.2s">
+          <div class="ci-icon">📍</div>
+          <div>
+            <strong>线下门店</strong>
+            <span>上海市静安区南京西路 1266 号<br/>欢迎预约到店面谈</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal-r">
+      <div class="contact-form">
+        <div class="cf-row">
+          <div class="cf-field"><label>您的姓名</label><input type="text" placeholder="王小明"/></div>
+          <div class="cf-field"><label>联系电话</label><input type="tel" placeholder="139 0000 0000"/></div>
+        </div>
+        <div class="cf-field"><label>感兴趣的目的地</label>
+          <select>
+            <option value="">请选择</option>
+            <option>云南·香格里拉</option>
+            <option>马尔代夫</option>
+            <option>冰岛·极光之旅</option>
+            <option>摩洛哥·撒哈拉</option>
+            <option>日本·四季游</option>
+            <option>欧洲经典线路</option>
+            <option>其他（请在留言中说明）</option>
+          </select>
+        </div>
+        <div class="cf-row">
+          <div class="cf-field"><label>出发时间</label><input type="month" style="color-scheme:dark"/></div>
+          <div class="cf-field"><label>出行人数</label>
+            <select>
+              <option>1 人</option>
+              <option>2 人（情侣/夫妻）</option>
+              <option>3–5 人（家庭）</option>
+              <option>6–10 人（小团）</option>
+              <option>10 人以上（大团）</option>
+            </select>
+          </div>
+        </div>
+        <div class="cf-field"><label>留言 / 特殊需求</label><textarea placeholder="比如：预算范围、特别期望、是否有老人孩子随行…"></textarea></div>
+        <button class="cf-submit" onclick="handleSubmit()">发送咨询 →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="ft-brand">
+      <div class="fb-logo">
+        <div class="fb-mark">✦</div>
+        <span class="fb-name">云境旅游</span>
+      </div>
+      <p>专注高品质定制旅行服务，让每一次出发都成为人生中最值得铭记的故事。</p>
+      <div class="ft-social">
+        <a title="微信" href="#">💬</a>
+        <a title="微博" href="#">📱</a>
+        <a title="小红书" href="#">📕</a>
+        <a title="抖音" href="#">🎵</a>
+      </div>
+    </div>
+    <div class="ft-col">
+      <h4>目的地</h4>
+      <ul>
+        <li><a href="#">云南·香格里拉</a></li>
+        <li><a href="#">马尔代夫</a></li>
+        <li><a href="#">冰岛</a></li>
+        <li><a href="#">摩洛哥</a></li>
+        <li><a href="#">日本</a></li>
+        <li><a href="#">欧洲</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h4>服务</h4>
+      <ul>
+        <li><a href="#">定制行程</a></li>
+        <li><a href="#">蜜月旅行</a></li>
+        <li><a href="#">家庭亲子游</a></li>
+        <li><a href="#">团建定制</a></li>
+        <li><a href="#">摄影旅行</a></li>
+        <li><a href="#">签证代办</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h4>关于我们</h4>
+      <ul>
+        <li><a href="#">品牌故事</a></li>
+        <li><a href="#">旅行顾问团队</a></li>
+        <li><a href="#">旅客评价</a></li>
+        <li><a href="#">媒体报道</a></li>
+        <li><a href="#">加入我们</a></li>
+        <li><a href="#">联系我们</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 云境旅游 · 旅行改变人生</p>
+    <div class="fb-links">
+      <a href="#">隐私政策</a>
+      <a href="#">服务条款</a>
+      <a href="#">退款说明</a>
+    </div>
+  </div>
+</footer>
+
+<button id="sto" onclick="scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div id="toast"></div>
+
+<script>
+// ── NAV scroll ──
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+  document.getElementById('sto').classList.toggle('show', window.scrollY > 400);
+});
+
+// ── Reveal on scroll ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); observer.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal, .reveal-l, .reveal-r').forEach(el => observer.observe(el));
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✅ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Contact form ──
+function handleSubmit() {
+  const inputs = document.querySelectorAll('#contact input, #contact select, #contact textarea');
+  let filled = false;
+  inputs.forEach(el => { if (el.value && el.value.trim()) filled = true; });
+  if (!filled) { showToast('请填写至少一项联系方式'); return; }
+  showToast('咨询已发送！顾问将在 2 小时内与您联系');
+  inputs.forEach(el => { if (el.tagName !== 'SELECT') el.value = ''; });
+}
+</script>
+</body>
+</html>

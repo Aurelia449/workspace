@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LUMINA AI — 让智能触手可及</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --f:-apple-system,"SF Pro Display","Helvetica Neue",sans-serif;
+  --bg:#000;--fg:#f5f5f7;--gray:#86868b;--border:rgba(255,255,255,.09);
+  --blue:#0071e3;--indigo:#5856d6;--cyan:#32ade6;--purple:#bf5af2;
+  --orange:#ff9f0a;--green:#30d158;--red:#ff453a;
+  --g1:linear-gradient(135deg,var(--blue),var(--purple));
+  --glass:rgba(255,255,255,.05);--glass-h:rgba(255,255,255,.08);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px}
+
+/* ══════════════════════════════════════════
+   NOISE + AMBIENT
+══════════════════════════════════════════ */
+#ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.amb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.5;animation:drift var(--t,20s) ease-in-out infinite alternate}
+.amb-1{width:700px;height:700px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(0,80,200,.3),transparent 70%);--t:25s}
+.amb-2{width:600px;height:600px;bottom:-150px;right:-150px;background:radial-gradient(circle,rgba(150,40,220,.25),transparent 70%);--t:30s}
+.amb-3{width:500px;height:500px;top:40%;left:45%;background:radial-gradient(circle,rgba(0,150,220,.12),transparent 70%);--t:22s}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,30px) scale(1.08)}}
+
+/* ══════════════════════════════════════════
+   NAV
+══════════════════════════════════════════ */
+#nav{
+  position:fixed;inset:0 0 auto;z-index:999;height:52px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 30px;
+  background:rgba(0,0,0,.65);
+  backdrop-filter:saturate(200%) blur(28px);
+  -webkit-backdrop-filter:saturate(200%) blur(28px);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  transition:background .3s;
+}
+.n-logo{display:flex;align-items:center;gap:10px}
+.n-mark{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--g1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:900;color:#fff;letter-spacing:-.5px;
+  box-shadow:0 2px 16px rgba(0,113,227,.4);
+}
+.n-name{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.n-ul{list-style:none;display:flex;gap:28px}
+.n-ul a{font-size:13px;color:rgba(245,245,247,.6);transition:color .2s}
+.n-ul a:hover{color:var(--fg)}
+.n-r{display:flex;align-items:center;gap:12px}
+.n-login{font-size:13px;color:rgba(245,245,247,.6);transition:color .2s}
+.n-login:hover{color:var(--fg)}
+.n-cta{
+  padding:8px 18px;border-radius:980px;font-size:13px;font-weight:600;
+  background:var(--blue);color:#fff;
+  box-shadow:0 2px 16px rgba(0,113,227,.35);
+  transition:filter .2s,transform .15s;
+}
+.n-cta:hover{filter:brightness(1.12);transform:scale(1.03)}
+
+/* ══════════════════════════════════════════
+   HERO
+══════════════════════════════════════════ */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:96px 24px 72px;overflow:hidden;
+}
+/* grid lines bg */
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black 40%,transparent 100%);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(50,173,230,.9);
+  background:rgba(50,173,230,.07);border:1px solid rgba(50,173,230,.18);
+  padding:6px 16px;border-radius:980px;margin-bottom:28px;
+  opacity:0;animation:fadeUp .6s .05s ease forwards;
+}
+.e-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:blink 2s ease-in-out infinite}
+.hero h1{
+  font-size:clamp(52px,9.5vw,106px);
+  font-weight:700;letter-spacing:-4px;line-height:1.01;
+  opacity:0;animation:fadeUp .75s .18s ease forwards;
+}
+.h1-l1{display:block;color:var(--fg)}
+.h1-l2{
+  display:block;
+  background:linear-gradient(120deg,#60a5fa 0%,var(--cyan) 35%,var(--purple) 70%,#f472b6 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-size:200%;animation:shimmer 5s linear infinite;
+}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+.hero-desc{
+  margin-top:24px;font-size:clamp(16px,2vw,20px);font-weight:300;
+  color:rgba(245,245,247,.52);max-width:580px;line-height:1.75;
+  opacity:0;animation:fadeUp .75s .32s ease forwards;
+}
+.hero-actions{
+  margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+  opacity:0;animation:fadeUp .75s .46s ease forwards;
+}
+.ha-primary{
+  padding:15px 32px;border-radius:980px;font-size:16px;font-weight:600;
+  background:var(--blue);color:#fff;
+  box-shadow:0 4px 32px rgba(0,113,227,.4);
+  transition:filter .2s,transform .15s,box-shadow .2s;
+}
+.ha-primary:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 44px rgba(0,113,227,.55)}
+.ha-ghost{
+  padding:15px 30px;border-radius:980px;font-size:16px;font-weight:500;
+  border:1.5px solid rgba(255,255,255,.18);color:var(--fg);
+  transition:background .2s,border-color .2s,transform .15s;
+}
+.ha-ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.3);transform:translateY(-1px)}
+
+/* HERO DASHBOARD MOCK */
+.dash-wrap{
+  margin-top:68px;
+  width:min(860px,92vw);
+  border-radius:22px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 48px 140px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.04);
+  opacity:0;animation:fadeUp .9s .6s ease forwards;
+  position:relative;
+}
+/* titlebar */
+.dash-bar{
+  background:rgba(28,28,30,.95);padding:12px 18px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.dash-dot{width:12px;height:12px;border-radius:50%}
+.dash-title{font-size:12px;color:rgba(255,255,255,.3);margin-left:8px;letter-spacing:.5px}
+/* body */
+.dash-body{
+  background:rgba(10,10,14,.95);
+  padding:28px;display:grid;grid-template-columns:200px 1fr;gap:16px;
+  min-height:320px;
+}
+/* sidebar */
+.dash-side{border-right:1px solid rgba(255,255,255,.06);padding-right:16px;display:flex;flex-direction:column;gap:6px}
+.dsi{
+  display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;
+  font-size:13px;cursor:pointer;transition:background .15s;
+  color:rgba(245,245,247,.45);
+}
+.dsi:hover{background:rgba(255,255,255,.06);color:var(--fg)}
+.dsi.active{background:rgba(0,113,227,.15);color:#60a5fa;font-weight:500}
+.dsi-ico{font-size:15px;width:20px;text-align:center}
+/* main */
+.dash-main{display:flex;flex-direction:column;gap:14px}
+/* metric row */
+.dm-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.dm-card{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;padding:14px 16px;
+}
+.dm-label{font-size:11px;color:rgba(245,245,247,.35);letter-spacing:.5px;margin-bottom:6px}
+.dm-val{font-size:22px;font-weight:700;letter-spacing:-1px}
+.dm-val.blue{color:#60a5fa}
+.dm-val.green{color:var(--green)}
+.dm-val.purple{color:var(--purple)}
+.dm-val.orange{color:var(--orange)}
+.dm-delta{font-size:11px;margin-top:3px;color:var(--green)}
+/* chart placeholder */
+.dm-chart{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;padding:16px;flex:1;position:relative;overflow:hidden;
+}
+.dm-chart-title{font-size:12px;color:rgba(245,245,247,.4);margin-bottom:12px;letter-spacing:.3px}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:80px}
+.bar{
+  flex:1;border-radius:4px 4px 0 0;
+  background:linear-gradient(180deg,rgba(0,113,227,.7),rgba(0,113,227,.2));
+  transition:height .3s;
+}
+.bar:nth-child(even){background:linear-gradient(180deg,rgba(191,90,242,.6),rgba(191,90,242,.15))}
+.dm-chat{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;
+}
+.chat-msg{display:flex;gap:8px;align-items:flex-start}
+.chat-bubble{
+  font-size:12px;line-height:1.5;padding:8px 12px;border-radius:10px;max-width:80%;
+}
+.chat-msg.u .chat-bubble{background:rgba(0,113,227,.2);border:1px solid rgba(0,113,227,.2);margin-left:auto}
+.chat-msg.a .chat-bubble{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07)}
+.chat-ava{width:24px;height:24px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;background:var(--g1)}
+
+/* ══════════════════════════════════════════
+   SECTION BASE
+══════════════════════════════════════════ */
+.sec{position:relative;z-index:1;padding:108px 24px}
+.w{max-width:980px;margin:0 auto}
+.ey{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:16px}
+.sh{font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-2px;line-height:1.08;max-width:680px}
+.sh b{font-weight:700;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sp{margin-top:18px;font-size:18px;font-weight:300;color:rgba(245,245,247,.48);max-width:540px;line-height:1.78}
+.sec-divider{border:none;border-top:1px solid var(--border);position:relative;z-index:1}
+
+/* ══════════════════════════════════════════
+   TICKER
+══════════════════════════════════════════ */
+.ticker-wrap{position:relative;z-index:1;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:42px 0;background:rgba(5,5,10,.6)}
+.ticker-track{display:flex;width:max-content;gap:0;animation:tick 32s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+.tick-item{display:flex;align-items:center;gap:0;padding:0 56px;border-right:1px solid rgba(255,255,255,.06)}
+.tick-n{font-size:clamp(38px,4.5vw,54px);font-weight:700;letter-spacing:-2px;background:linear-gradient(135deg,#fff,rgba(255,255,255,.4));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tick-l{font-size:12px;color:rgba(245,245,247,.3);margin-top:5px;letter-spacing:.5px}
+.tick-col{display:flex;flex-direction:column;align-items:center}
+
+/* ══════════════════════════════════════════
+   PRODUCTS — BENTO
+══════════════════════════════════════════ */
+.bento{margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:14px}
+.bc{
+  background:rgba(12,12,16,.9);border:1px solid rgba(255,255,255,.08);
+  border-radius:22px;padding:36px 34px;
+  position:relative;overflow:hidden;
+  transition:transform .28s cubic-bezier(.25,.8,.25,1),border-color .28s;
+}
+.bc:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.16)}
+.bc::after{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+.bc:hover::after{opacity:1}
+.bc.wide{grid-column:1/-1}
+.bc.tall{grid-row:span 2}
+/* tint overlays per card */
+.bc-blue::after{background:radial-gradient(ellipse at 0% 0%,rgba(0,113,227,.12),transparent 60%)}
+.bc-purple::after{background:radial-gradient(ellipse at 100% 0%,rgba(191,90,242,.1),transparent 60%)}
+.bc-cyan::after{background:radial-gradient(ellipse at 0% 100%,rgba(50,173,230,.1),transparent 60%)}
+.bc-green::after{background:radial-gradient(ellipse at 100% 100%,rgba(48,209,88,.08),transparent 60%)}
+.bc-orange::after{background:radial-gradient(ellipse at 50% 0%,rgba(255,159,10,.08),transparent 60%)}
+.b-ico{
+  width:48px;height:48px;border-radius:13px;margin-bottom:20px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);
+  position:relative;z-index:1;
+}
+.b-tag{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:10px;position:relative;z-index:1}
+.b-title{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:10px;position:relative;z-index:1}
+.b-desc{font-size:14px;color:rgba(245,245,247,.48);line-height:1.7;position:relative;z-index:1}
+.b-link{display:inline-flex;align-items:center;gap:5px;margin-top:16px;font-size:14px;color:var(--blue);font-weight:500;position:relative;z-index:1;transition:gap .2s}
+.b-link:hover{gap:9px}
+/* wide card inner */
+.bc-wide-inner{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;position:relative;z-index:1}
+.bc-vis{
+  aspect-ratio:4/3;border-radius:16px;
+  background:linear-gradient(145deg,rgba(10,10,20,.9),rgba(18,18,32,.9));
+  border:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;
+}
+.bc-vis::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 40% 40%,rgba(0,113,227,.18),transparent 55%),radial-gradient(circle at 70% 70%,rgba(191,90,242,.12),transparent 50%)}
+.vis-big{position:relative;font-size:58px;font-weight:800;letter-spacing:-3px;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+.vis-small{position:relative;font-size:11px;color:rgba(245,245,247,.28);letter-spacing:2px;text-transform:uppercase;margin-top:6px;text-align:center}
+
+/* ══════════════════════════════════════════
+   USE CASES
+══════════════════════════════════════════ */
+.cases-sec{background:rgba(5,5,8,.8)}
+.cases-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-top:52px;overflow-x:auto}
+.c-tab{
+  padding:14px 22px;font-size:14px;font-weight:500;color:var(--gray);
+  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;
+  transition:color .2s,border-color .2s;
+}
+.c-tab:hover{color:var(--fg)}
+.c-tab.active{color:var(--fg);border-bottom-color:var(--blue)}
+.cases-panels{margin-top:40px}
+.c-panel{display:none;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.c-panel.active{display:grid}
+.c-panel h3{font-size:clamp(24px,3vw,34px);font-weight:700;letter-spacing:-1px;line-height:1.2;margin-bottom:14px}
+.c-panel p{font-size:15px;color:rgba(245,245,247,.5);line-height:1.75;margin-bottom:24px}
+.c-bullets{list-style:none;display:flex;flex-direction:column;gap:10px}
+.c-bullets li{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(245,245,247,.7)}
+.c-check{color:var(--green);font-size:15px;flex-shrink:0}
+.c-vis{
+  border-radius:18px;aspect-ratio:4/3;
+  display:flex;align-items:center;justify-content:center;font-size:56px;
+  border:1px solid rgba(255,255,255,.07);position:relative;overflow:hidden;
+}
+.c-vis::before{content:'';position:absolute;inset:0}
+.cv1{background:linear-gradient(145deg,#000612,#001030)}.cv1::before{background:radial-gradient(circle at 40% 35%,rgba(0,113,227,.22),transparent 55%)}
+.cv2{background:linear-gradient(145deg,#060012,#150028)}.cv2::before{background:radial-gradient(circle at 60% 40%,rgba(191,90,242,.2),transparent 55%)}
+.cv3{background:linear-gradient(145deg,#001208,#001e10)}.cv3::before{background:radial-gradient(circle at 35% 50%,rgba(48,209,88,.18),transparent 55%)}
+.cv4{background:linear-gradient(145deg,#120800,#201200)}.cv4::before{background:radial-gradient(circle at 55% 40%,rgba(255,159,10,.18),transparent 55%)}
+
+/* ══════════════════════════════════════════
+   NUMBERS STRIP
+══════════════════════════════════════════ */
+.nums-strip{position:relative;z-index:1;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.nums-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.num-cell{
+  padding:52px 30px;text-align:center;
+  border-right:1px solid var(--border);
+  transition:background .2s;
+}
+.num-cell:last-child{border-right:none}
+.num-cell:hover{background:rgba(255,255,255,.03)}
+.num-n{font-size:clamp(40px,5.5vw,64px);font-weight:700;letter-spacing:-3px;line-height:1}
+.num-n.g1{background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.num-n.g2{background:linear-gradient(135deg,var(--purple),#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.num-n.g3{background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.num-n.g4{background:linear-gradient(135deg,var(--orange),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.num-l{font-size:13px;color:var(--gray);margin-top:9px;letter-spacing:.3px}
+
+/* ══════════════════════════════════════════
+   TEAM
+══════════════════════════════════════════ */
+.team-sec{background:rgba(5,5,8,.6)}
+.team-grid{margin-top:56px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.tm-card{
+  background:rgba(12,12,16,.9);border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;padding:28px 24px;text-align:center;
+  transition:transform .25s,border-color .25s;
+}
+.tm-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.16)}
+.tm-avatar{
+  width:72px;height:72px;border-radius:50%;margin:0 auto 16px;
+  display:flex;align-items:center;justify-content:center;font-size:30px;
+  border:2px solid rgba(255,255,255,.1);
+}
+.tm-name{font-size:15px;font-weight:600;letter-spacing:-.2px;margin-bottom:4px}
+.tm-role{font-size:13px;color:var(--gray);margin-bottom:12px}
+.tm-tags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.tm-tag{font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(245,245,247,.5)}
+
+/* ══════════════════════════════════════════
+   PRICING
+══════════════════════════════════════════ */
+.price-sec{background:#000}
+.price-toggle{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:36px;font-size:14px;color:var(--gray)}
+.price-switch{
+  width:44px;height:24px;background:rgba(255,255,255,.1);border-radius:12px;
+  cursor:pointer;position:relative;transition:background .2s;
+}
+.price-switch.on{background:var(--blue)}
+.ps-thumb{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+.price-switch.on .ps-thumb{left:23px}
+.price-badge-wrap{font-size:11px;color:var(--green);background:rgba(48,209,88,.1);border:1px solid rgba(48,209,88,.2);padding:2px 8px;border-radius:4px}
+.price-grid{margin-top:52px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+.pc{
+  border-radius:22px;padding:36px 30px;
+  background:rgba(12,12,16,.9);border:1px solid rgba(255,255,255,.08);
+  transition:transform .25s,border-color .25s;
+}
+.pc:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.16)}
+.pc.hot{
+  background:linear-gradient(145deg,rgba(0,50,140,.25),rgba(100,20,180,.15));
+  border-color:rgba(0,113,227,.28);position:relative;
+}
+.pc-badge{
+  position:absolute;top:0;left:50%;transform:translate(-50%,-50%);
+  font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  background:var(--g1);color:#fff;padding:5px 18px;border-radius:980px;
+  white-space:nowrap;
+}
+.pc-tier{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gray);margin-bottom:14px}
+.pc-price{font-size:clamp(36px,4vw,52px);font-weight:700;letter-spacing:-2.5px;line-height:1;margin-bottom:6px}
+.pc-price sup{font-size:20px;font-weight:600;vertical-align:top;margin-top:8px;margin-right:2px}
+.pc-desc{font-size:13px;color:var(--gray);margin-bottom:22px}
+.pc-hr{border:none;border-top:1px solid rgba(255,255,255,.07);margin-bottom:22px}
+.pc-features{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:28px}
+.pc-features li{display:flex;align-items:center;gap:9px;font-size:14px;color:rgba(245,245,247,.7)}
+.pf-y{color:var(--green);font-size:14px;flex-shrink:0}
+.pf-n{color:rgba(245,245,247,.2);font-size:14px;flex-shrink:0}
+.pc-features li.dim{color:rgba(245,245,247,.25)}
+.pc-btn{
+  display:block;text-align:center;padding:13px;border-radius:12px;
+  font-size:15px;font-weight:600;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  color:var(--fg);transition:background .2s,border-color .2s;
+}
+.pc-btn:hover{background:rgba(255,255,255,.12)}
+.pc.hot .pc-btn{background:var(--blue);border-color:var(--blue);box-shadow:0 4px 24px rgba(0,113,227,.3)}
+.pc.hot .pc-btn:hover{filter:brightness(1.1)}
+
+/* ══════════════════════════════════════════
+   TESTIMONIALS
+══════════════════════════════════════════ */
+.test-sec{background:rgba(5,5,8,.6)}
+.test-marquee{overflow:hidden;margin-top:52px}
+.test-row{display:flex;gap:14px;width:max-content;animation:tick 40s linear infinite}
+.test-row:hover{animation-play-state:paused}
+.test-row.r2{animation-direction:reverse;animation-duration:46s;margin-top:14px}
+.tc{
+  background:rgba(12,12,16,.9);border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;padding:26px 28px;width:340px;flex-shrink:0;
+}
+.tc-stars{color:#ffd60a;font-size:12px;letter-spacing:2px;margin-bottom:14px}
+.tc-text{font-size:14px;color:rgba(245,245,247,.7);line-height:1.75;margin-bottom:18px}
+.tc-author{display:flex;align-items:center;gap:12px}
+.tc-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.tc-name{font-size:14px;font-weight:600}
+.tc-role{font-size:12px;color:var(--gray);margin-top:1px}
+
+/* ══════════════════════════════════════════
+   FAQ
+══════════════════════════════════════════ */
+.faq-sec{background:#000}
+.faq-list{margin-top:52px;display:flex;flex-direction:column;gap:0}
+.faq-item{border-bottom:1px solid rgba(255,255,255,.07)}
+.faq-q{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 0;cursor:pointer;font-size:16px;font-weight:500;letter-spacing:-.2px;
+  transition:color .2s;gap:16px;
+}
+.faq-q:hover{color:rgba(245,245,247,.7)}
+.faq-arrow{font-size:18px;color:var(--gray);transition:transform .3s;flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(45deg);color:var(--blue)}
+.faq-a{
+  font-size:15px;color:rgba(245,245,247,.48);line-height:1.75;
+  max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;
+}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:20px}
+
+/* ══════════════════════════════════════════
+   CTA FINAL
+══════════════════════════════════════════ */
+.cta-final{
+  position:relative;z-index:1;
+  padding:120px 24px;text-align:center;overflow:hidden;
+  border-top:1px solid var(--border);
+}
+.cta-final::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 25% 50%,rgba(0,113,227,.13),transparent 55%),
+    radial-gradient(ellipse at 75% 50%,rgba(191,90,242,.1),transparent 55%);
+}
+.cta-final h2{position:relative;font-size:clamp(34px,5.5vw,62px);font-weight:700;letter-spacing:-2.5px;line-height:1.05;margin-bottom:18px}
+.cta-final p{position:relative;font-size:18px;font-weight:300;color:rgba(245,245,247,.48);max-width:500px;margin:0 auto 44px;line-height:1.75}
+.cta-final .cta-btns{position:relative;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer{
+  position:relative;z-index:1;
+  background:#000;border-top:1px solid var(--border);padding:60px 24px 32px;
+}
+.ft{max-width:980px;margin:0 auto}
+.ft-grid{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 1fr;gap:48px;padding-bottom:44px;border-bottom:1px solid var(--border)}
+.ft-about .fa-logo{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.ft-about .fa-mark{width:26px;height:26px;border-radius:7px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff}
+.ft-about .fa-name{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.ft-about p{font-size:13px;color:var(--gray);line-height:1.65;max-width:200px;margin-bottom:20px}
+.ft-social{display:flex;gap:8px}
+.ft-s{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-size:13px;transition:background .2s}
+.ft-s:hover{background:rgba(255,255,255,.12)}
+.ft-col h5{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:16px}
+.ft-col ul{list-style:none}
+.ft-col li{margin-bottom:10px}
+.ft-col a{font-size:13px;color:rgba(245,245,247,.45);transition:color .2s}
+.ft-col a:hover{color:var(--fg)}
+.ft-bottom{padding-top:22px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(245,245,247,.22)}
+.ft-bottom a{color:rgba(245,245,247,.22);transition:color .2s}
+.ft-bottom a:hover{color:rgba(245,245,247,.5)}
+
+/* ══════════════════════════════════════════
+   REVEAL
+══════════════════════════════════════════ */
+.r{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.r.on{opacity:1;transform:none}
+.d1{transition-delay:.07s}.d2{transition-delay:.14s}.d3{transition-delay:.21s}
+.d4{transition-delay:.28s}.d5{transition-delay:.35s}
+
+/* ══════════════════════════════════════════
+   KEYFRAMES
+══════════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{box-shadow:0 0 6px var(--cyan)}50%{box-shadow:0 0 16px var(--cyan)}}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media(max-width:880px){
+  .n-ul{display:none}
+  .n-login{display:none}
+  .bento{grid-template-columns:1fr}
+  .bc.wide,.bc.tall{grid-column:auto;grid-row:auto}
+  .bc-wide-inner{grid-template-columns:1fr}
+  .c-panel.active{grid-template-columns:1fr}
+  .c-vis{display:none}
+  .nums-grid{grid-template-columns:repeat(2,1fr)}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+  .price-grid{grid-template-columns:1fr}
+  .ft-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  .dash-body{grid-template-columns:1fr}
+  .dash-side{display:none}
+  .dm-row{grid-template-columns:repeat(2,1fr)}
+  .nums-grid{grid-template-columns:repeat(2,1fr)}
+  .team-grid{grid-template-columns:1fr 1fr}
+  .ft-grid{grid-template-columns:1fr}
+  .ft-bottom{flex-direction:column;gap:6px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div id="ambient">
+  <div class="amb amb-1"></div>
+  <div class="amb amb-2"></div>
+  <div class="amb amb-3"></div>
+</div>
+
+<!-- ── NAV ── -->
+<nav id="nav">
+  <div class="n-logo">
+    <div class="n-mark">L</div>
+    <span class="n-name">LUMINA AI</span>
+  </div>
+  <ul class="n-ul">
+    <li><a href="#products">产品</a></li>
+    <li><a href="#cases">用例</a></li>
+    <li><a href="#pricing">定价</a></li>
+    <li><a href="#team">团队</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="n-r">
+    <a href="#" class="n-login">登录</a>
+    <a href="#pricing" class="n-cta">免费开始</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow"><span class="e-dot"></span>全新发布 · LUMINA AI 2.0</div>
+  <h1>
+    <span class="h1-l1">让每家公司</span>
+    <span class="h1-l2">都拥有 AI 超能力</span>
+  </h1>
+  <p class="hero-desc">无需 AI 团队，无需 GPU 集群。LUMINA 提供完整的 AI 基础设施，让你在几分钟内将大模型能力融入任何产品。</p>
+  <div class="hero-actions">
+    <a href="#pricing" class="ha-primary">免费开始使用</a>
+    <a href="#products" class="ha-ghost">探索产品 →</a>
+  </div>
+
+  <!-- DASHBOARD MOCKUP -->
+  <div class="dash-wrap">
+    <div class="dash-bar">
+      <div class="dash-dot" style="background:#ff5f57"></div>
+      <div class="dash-dot" style="background:#febc2e"></div>
+      <div class="dash-dot" style="background:#28c840"></div>
+      <span class="dash-title">LUMINA Studio — 控制台</span>
+    </div>
+    <div class="dash-body">
+      <!-- sidebar -->
+      <div class="dash-side">
+        <div class="dsi active"><span class="dsi-ico">📊</span>概览</div>
+        <div class="dsi"><span class="dsi-ico">🧠</span>模型</div>
+        <div class="dsi"><span class="dsi-ico">🔌</span>API</div>
+        <div class="dsi"><span class="dsi-ico">📁</span>数据集</div>
+        <div class="dsi"><span class="dsi-ico">🔒</span>安全</div>
+        <div class="dsi"><span class="dsi-ico">⚙️</span>设置</div>
+      </div>
+      <!-- main -->
+      <div class="dash-main">
+        <div class="dm-row">
+          <div class="dm-card"><div class="dm-label">今日调用</div><div class="dm-val blue">2.4M</div><div class="dm-delta">↑ 18%</div></div>
+          <div class="dm-card"><div class="dm-label">平均延迟</div><div class="dm-val green">11ms</div><div class="dm-delta">↓ 5%</div></div>
+          <div class="dm-card"><div class="dm-label">活跃模型</div><div class="dm-val purple">7</div><div class="dm-delta">+ 2 本周</div></div>
+          <div class="dm-card"><div class="dm-label">Token 用量</div><div class="dm-val orange">840M</div><div class="dm-delta">↑ 24%</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1">
+          <div class="dm-chart">
+            <div class="dm-chart-title">调用量趋势（近 7 天）</div>
+            <div class="chart-bars">
+              <div class="bar" style="height:45%"></div>
+              <div class="bar" style="height:62%"></div>
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:78%"></div>
+              <div class="bar" style="height:67%"></div>
+              <div class="bar" style="height:90%"></div>
+              <div class="bar" style="height:100%"></div>
+            </div>
+          </div>
+          <div class="dm-chat">
+            <div class="chat-msg a"><div class="chat-ava">L</div><div class="chat-bubble">你好！我是 LUMINA，有什么可以帮你？</div></div>
+            <div class="chat-msg u"><div class="chat-bubble">分析一下上季度的销售数据</div></div>
+            <div class="chat-msg a"><div class="chat-ava">L</div><div class="chat-bubble">好的，正在分析……上季度营收同比增长 34%，核心驱动来自 SaaS 订阅，环比提升 28%。</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TICKER ── -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">10B+</div><div class="tick-l">每日 API 调用</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">5,000+</div><div class="tick-l">企业客户</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">&lt;12ms</div><div class="tick-l">推理延迟</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">99.99%</div><div class="tick-l">服务可用率</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">200+</div><div class="tick-l">支持模型</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">40+</div><div class="tick-l">全球节点</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">SOC2</div><div class="tick-l">安全认证</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">24/7</div><div class="tick-l">技术支持</div></div></div>
+    <!-- dup -->
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">10B+</div><div class="tick-l">每日 API 调用</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">5,000+</div><div class="tick-l">企业客户</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">&lt;12ms</div><div class="tick-l">推理延迟</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">99.99%</div><div class="tick-l">服务可用率</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">200+</div><div class="tick-l">支持模型</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">40+</div><div class="tick-l">全球节点</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">SOC2</div><div class="tick-l">安全认证</div></div></div>
+    <div class="tick-item"><div class="tick-col"><div class="tick-n">24/7</div><div class="tick-l">技术支持</div></div></div>
+  </div>
+</div>
+
+<!-- ── PRODUCTS ── -->
+<section class="sec" id="products">
+  <div class="w">
+    <p class="ey r">产品矩阵</p>
+    <h2 class="sh r d1">一个平台，<br/><b>覆盖 AI 全链路。</b></h2>
+    <p class="sp r d2">从模型推理到多模态应用，LUMINA 提供你所需的一切，开箱即用。</p>
+
+    <div class="bento">
+      <!-- featured wide -->
+      <div class="bc bc-blue wide r">
+        <div class="bc-wide-inner">
+          <div>
+            <div class="b-tag">旗舰引擎</div>
+            <div class="b-title" style="font-size:clamp(22px,3vw,32px);letter-spacing:-1px">LUMINA Core<br/>推理引擎</div>
+            <p class="b-desc" style="font-size:15px;max-width:400px;margin-top:12px">业界最快的大模型推理服务，支持 200+ 开源模型，首 token 延迟 &lt;12ms，吞吐量超主流方案 8×。按 Token 计费，无起步成本。</p>
+            <a href="#" class="b-link">了解 Core →</a>
+          </div>
+          <div class="bc-vis">
+            <div><div class="vis-big">200+</div><div class="vis-small">Models Supported</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bc bc-purple r">
+        <div class="b-ico">🎨</div>
+        <div class="b-title">LUMINA Vision</div>
+        <p class="b-desc">图像理解、OCR、视频分析，多模态 API 一次接入，99.3% 精度，实时响应。</p>
+        <a href="#" class="b-link">了解更多 →</a>
+      </div>
+
+      <div class="bc bc-cyan r d1">
+        <div class="b-ico">🎙️</div>
+        <div class="b-title">LUMINA Voice</div>
+        <p class="b-desc">业界领先的语音识别与合成，支持 40+ 语言，低至 100ms 端到端延迟。</p>
+        <a href="#" class="b-link">了解更多 →</a>
+      </div>
+
+      <div class="bc bc-green r d2">
+        <div class="b-ico">🔒</div>
+        <div class="b-title">LUMINA Guard</div>
+        <p class="b-desc">AI 内容安全套件，幻觉检测、有害内容过滤、隐私合规，企业级开箱即用。</p>
+        <a href="#" class="b-link">了解更多 →</a>
+      </div>
+
+      <div class="bc bc-orange r">
+        <div class="b-ico">🔬</div>
+        <div class="b-title">LUMINA Fine-tune</div>
+        <p class="b-desc">可视化微调平台，无需代码，数据上传后自动训练，最快 30 分钟出模型。</p>
+        <a href="#" class="b-link">了解更多 →</a>
+      </div>
+
+      <div class="bc bc-blue r d1">
+        <div class="b-ico">📦</div>
+        <div class="b-title">LUMINA Deploy</div>
+        <p class="b-desc">一键私有化部署，支持裸金属、Kubernetes、边缘设备，全球 40+ 节点加速。</p>
+        <a href="#" class="b-link">了解更多 →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── USE CASES ── -->
+<section class="sec cases-sec" id="cases">
+  <div class="w">
+    <p class="ey r">应用场景</p>
+    <h2 class="sh r d1">你的行业，<br/><b>我们的能力。</b></h2>
+
+    <div class="cases-tabs r d2">
+      <div class="c-tab active" data-panel="p1">🏢 企业服务</div>
+      <div class="c-tab" data-panel="p2">🛒 电商零售</div>
+      <div class="c-tab" data-panel="p3">🏥 医疗健康</div>
+      <div class="c-tab" data-panel="p4">🎓 教育培训</div>
+    </div>
+
+    <div class="cases-panels r d3">
+      <div class="c-panel active" id="p1">
+        <div>
+          <h3>智能客服 & 知识库</h3>
+          <p>将企业文档、FAQ、产品手册接入 LUMINA，10 分钟构建能回答任何问题的 AI 客服，准确率超 96%。</p>
+          <ul class="c-bullets">
+            <li><span class="c-check">✓</span>私有知识库 RAG 检索</li>
+            <li><span class="c-check">✓</span>多轮对话上下文保持</li>
+            <li><span class="c-check">✓</span>支持微信、钉钉、飞书接入</li>
+            <li><span class="c-check">✓</span>全链路数据不出域</li>
+          </ul>
+        </div>
+        <div class="c-vis cv1">🏢</div>
+      </div>
+      <div class="c-panel" id="p2">
+        <div>
+          <h3>商品理解 & 个性推荐</h3>
+          <p>用视觉 AI 自动提取商品属性，结合用户行为构建个性化推荐，转化率提升 40%+。</p>
+          <ul class="c-bullets">
+            <li><span class="c-check">✓</span>商品图片自动打标签</li>
+            <li><span class="c-check">✓</span>多模态搜索（图搜图/文搜图）</li>
+            <li><span class="c-check">✓</span>实时个性化推荐引擎</li>
+            <li><span class="c-check">✓</span>评论情感分析与摘要</li>
+          </ul>
+        </div>
+        <div class="c-vis cv2">🛒</div>
+      </div>
+      <div class="c-panel" id="p3">
+        <div>
+          <h3>影像辅助诊断 & 文档处理</h3>
+          <p>端侧部署保障患者数据隐私，AI 辅助影像阅片速度提升 5×，病历结构化效率提升 80%。</p>
+          <ul class="c-bullets">
+            <li><span class="c-check">✓</span>医学影像分析（CT/MRI/X光）</li>
+            <li><span class="c-check">✓</span>病历自动结构化提取</li>
+            <li><span class="c-check">✓</span>HIPAA / 等保三级合规</li>
+            <li><span class="c-check">✓</span>私有化本地部署</li>
+          </ul>
+        </div>
+        <div class="c-vis cv3">🏥</div>
+      </div>
+      <div class="c-panel" id="p4">
+        <div>
+          <h3>AI 学习助手 & 内容生成</h3>
+          <p>个性化学习路径规划，AI 作业辅导，课程内容自动生成，学习效率提升 3×。</p>
+          <ul class="c-bullets">
+            <li><span class="c-check">✓</span>自适应学习路径推荐</li>
+            <li><span class="c-check">✓</span>Socratic 对话式辅导</li>
+            <li><span class="c-check">✓</span>课件与题库自动生成</li>
+            <li><span class="c-check">✓</span>学情分析与报告</li>
+          </ul>
+        </div>
+        <div class="c-vis cv4">🎓</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NUMBERS ── -->
+<div class="nums-strip">
+  <div class="nums-grid">
+    <div class="num-cell r"><div class="num-n g1">10B+</div><div class="num-l">每日 API 调用量</div></div>
+    <div class="num-cell r d1"><div class="num-n g2">5,000+</div><div class="num-l">全球企业客户</div></div>
+    <div class="num-cell r d2"><div class="num-n g3">99.99%</div><div class="num-l">服务可用率 SLA</div></div>
+    <div class="num-cell r d3"><div class="num-n g4">8×</div><div class="num-l">吞吐量行业对比</div></div>
+  </div>
+</div>
+
+<!-- ── TEAM ── -->
+<section class="sec team-sec" id="team">
+  <div class="w">
+    <p class="ey r">创始团队</p>
+    <h2 class="sh r d1">来自全球顶尖<br/><b>AI 实验室的团队。</b></h2>
+    <p class="sp r d2">深度学习领域 50 年累计经验，曾主导 GPT、LLaMA、Gemini 等核心研发工作。</p>
+
+    <div class="team-grid">
+      <div class="tm-card r">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,rgba(0,113,227,.3),rgba(0,113,227,.1))">👨‍💻</div>
+        <div class="tm-name">陈立远</div>
+        <div class="tm-role">CEO & 联合创始人</div>
+        <div class="tm-tags"><span class="tm-tag">前 OpenAI</span><span class="tm-tag">斯坦福 PhD</span></div>
+      </div>
+      <div class="tm-card r d1">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,rgba(191,90,242,.3),rgba(191,90,242,.1))">👩‍🔬</div>
+        <div class="tm-name">林晓静</div>
+        <div class="tm-role">CTO & 联合创始人</div>
+        <div class="tm-tags"><span class="tm-tag">前 Google Brain</span><span class="tm-tag">MIT PhD</span></div>
+      </div>
+      <div class="tm-card r d2">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,rgba(50,173,230,.3),rgba(50,173,230,.1))">👨‍🔬</div>
+        <div class="tm-name">王思哲</div>
+        <div class="tm-role">首席科学家</div>
+        <div class="tm-tags"><span class="tm-tag">前 Meta AI</span><span class="tm-tag">CMU 博士</span></div>
+      </div>
+      <div class="tm-card r d3">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,rgba(48,209,88,.3),rgba(48,209,88,.1))">👩‍💼</div>
+        <div class="tm-name">赵雨桐</div>
+        <div class="tm-role">COO</div>
+        <div class="tm-tags"><span class="tm-tag">前阿里云 AI</span><span class="tm-tag">清华大学</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section class="sec price-sec" id="pricing">
+  <div class="w">
+    <p class="ey r" style="text-align:center">定价方案</p>
+    <h2 class="sh r d1" style="text-align:center;max-width:none;margin:0 auto">透明定价，<br/><b>按需付费。</b></h2>
+    <div class="price-toggle r d2">
+      <span>按月付费</span>
+      <div class="price-switch" id="pswitch"><div class="ps-thumb"></div></div>
+      <span>按年付费</span>
+      <span class="price-badge-wrap">省 20%</span>
+    </div>
+
+    <div class="price-grid">
+      <div class="pc r">
+        <div class="pc-tier">入门版</div>
+        <div class="pc-price"><sup>¥</sup>0</div>
+        <div class="pc-desc">永久免费，每月 100 万次调用</div>
+        <div class="pc-hr"></div>
+        <ul class="pc-features">
+          <li><span class="pf-y">✓</span>LUMINA Core API</li>
+          <li><span class="pf-y">✓</span>100 万 Token / 月</li>
+          <li><span class="pf-y">✓</span>基础模型库（20+ 模型）</li>
+          <li><span class="pf-y">✓</span>社区技术支持</li>
+          <li class="dim"><span class="pf-n">✗</span>自定义微调</li>
+          <li class="dim"><span class="pf-n">✗</span>私有化部署</li>
+          <li class="dim"><span class="pf-n">✗</span>SLA 保障</li>
+        </ul>
+        <a href="#" class="pc-btn">免费开始</a>
+      </div>
+
+      <div class="pc hot r d1">
+        <div class="pc-badge">最受欢迎</div>
+        <div class="pc-tier" style="color:rgba(100,165,250,.8)">专业版</div>
+        <div class="pc-price"><sup>¥</sup><span class="price-val">2,999</span></div>
+        <div class="pc-desc">/ 月 · 每月 10 亿次调用</div>
+        <div class="pc-hr"></div>
+        <ul class="pc-features">
+          <li><span class="pf-y">✓</span>全部 API 产品权限</li>
+          <li><span class="pf-y">✓</span>10 亿 Token / 月</li>
+          <li><span class="pf-y">✓</span>完整模型库（200+ 模型）</li>
+          <li><span class="pf-y">✓</span>自定义微调（Fine-tune）</li>
+          <li><span class="pf-y">✓</span>LUMINA Studio 完整功能</li>
+          <li><span class="pf-y">✓</span>99.9% SLA + 优先支持</li>
+          <li class="dim"><span class="pf-n">✗</span>私有化部署</li>
+        </ul>
+        <a href="#" class="pc-btn">立即订阅</a>
+      </div>
+
+      <div class="pc r d2">
+        <div class="pc-tier">企业版</div>
+        <div class="pc-price" style="font-size:36px;letter-spacing:-1px">定制报价</div>
+        <div class="pc-desc">联系我们获取专属方案</div>
+        <div class="pc-hr"></div>
+        <ul class="pc-features">
+          <li><span class="pf-y">✓</span>专业版全部功能</li>
+          <li><span class="pf-y">✓</span>无限 Token 调用</li>
+          <li><span class="pf-y">✓</span>私有化 / 混合云部署</li>
+          <li><span class="pf-y">✓</span>专属客户成功团队</li>
+          <li><span class="pf-y">✓</span>合规审计与安全评估</li>
+          <li><span class="pf-y">✓</span>99.99% SLA 保障</li>
+          <li><span class="pf-y">✓</span>源代码托管选项</li>
+        </ul>
+        <a href="#" class="pc-btn">联系销售</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="sec test-sec">
+  <div class="w">
+    <p class="ey r">客户评价</p>
+    <h2 class="sh r d1">5,000+ 家企业<br/><b>的共同选择。</b></h2>
+  </div>
+  <div class="test-marquee" style="margin-top:52px">
+    <div class="test-row">
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"接入 LUMINA Core 之后，我们的推理成本直接降了 70%，延迟从 200ms 到 12ms，产品体验天壤之别。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(0,113,227,.2)">👨‍💻</div><div><div class="tc-name">张明远</div><div class="tc-role">CTO · TechCorp 科技</div></div></div></div>
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"Vision API 的多模态能力让我们的商品审核自动化率从 30% 提升到 95%，人力成本节省了 80%。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(191,90,242,.2)">👩‍🔬</div><div><div class="tc-name">李晓雨</div><div class="tc-role">AI 负责人 · NovaMall</div></div></div></div>
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"从 API 接入到上线产品只花了三天。Fine-tune 平台让我们的非技术同学也能独立完成模型定制。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(50,173,230,.2)">👨‍💼</div><div><div class="tc-name">王浩然</div><div class="tc-role">产品总监 · EduNext</div></div></div></div>
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"医疗场景对数据安全要求极高，LUMINA 的私有化部署方案让我们在合规框架内充分享受了 AI 红利。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(48,209,88,.2)">👩‍⚕️</div><div><div class="tc-name">陈思远</div><div class="tc-role">技术架构师 · MedCloud</div></div></div></div>
+      <!-- dup for loop -->
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"接入 LUMINA Core 之后，我们的推理成本直接降了 70%，延迟从 200ms 到 12ms，产品体验天壤之别。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(0,113,227,.2)">👨‍💻</div><div><div class="tc-name">张明远</div><div class="tc-role">CTO · TechCorp 科技</div></div></div></div>
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"Vision API 的多模态能力让我们的商品审核自动化率从 30% 提升到 95%，人力成本节省了 80%。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(191,90,242,.2)">👩‍🔬</div><div><div class="tc-name">李晓雨</div><div class="tc-role">AI 负责人 · NovaMall</div></div></div></div>
+    </div>
+    <div class="test-row r2">
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"LUMINA Guard 帮我们在 UGC 平台实现了实时内容安全，误判率不到 0.1%，终于可以放心扩量了。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(255,159,10,.2)">👨‍🎨</div><div><div class="tc-name">刘天宇</div><div class="tc-role">工程 VP · CreativeHub</div></div></div></div>
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"Voice API 支持 40+ 语言，延迟低到用户感知不到。我们的全球化产品终于不用为语音能力发愁了。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(50,173,230,.2)">👩‍💻</div><div><div class="tc-name">黄雅琳</div><div class="tc-role">首席工程师 · GlobalApp</div></div></div></div>
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"99.99% 的 SLA 让我们在和大客户谈合同时底气十足，LUMINA 是真正企业级的 AI 基础设施。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(191,90,242,.2)">👨‍💼</div><div><div class="tc-name">赵文博</div><div class="tc-role">CEO · EnterpriseAI</div></div></div></div>
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"用 Fine-tune 平台定制了专属客服模型，三个月时间客户满意度从 72% 提升到 94%，效果超出预期。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(48,209,88,.2)">👩‍💼</div><div><div class="tc-name">孙嘉宁</div><div class="tc-role">运营总监 · ServiceCo</div></div></div></div>
+      <!-- dup -->
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"LUMINA Guard 帮我们在 UGC 平台实现了实时内容安全，误判率不到 0.1%，终于可以放心扩量了。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(255,159,10,.2)">👨‍🎨</div><div><div class="tc-name">刘天宇</div><div class="tc-role">工程 VP · CreativeHub</div></div></div></div>
+      <div class="tc"><div class="tc-stars">★★★★★</div><p class="tc-text">"Voice API 支持 40+ 语言，延迟低到用户感知不到。我们的全球化产品终于不用为语音能力发愁了。"</p><div class="tc-author"><div class="tc-ava" style="background:rgba(50,173,230,.2)">👩‍💻</div><div><div class="tc-name">黄雅琳</div><div class="tc-role">首席工程师 · GlobalApp</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="sec faq-sec" id="faq">
+  <div class="w">
+    <p class="ey r">常见问题</p>
+    <h2 class="sh r d1">你可能想<br/><b>知道的事。</b></h2>
+
+    <div class="faq-list r d2">
+      <div class="faq-item open">
+        <div class="faq-q">LUMINA 和直接调用 OpenAI / Claude API 有什么区别？<span class="faq-arrow">+</span></div>
+        <div class="faq-a">LUMINA 不是转发代理。我们提供自研推理引擎、私有化部署能力、自定义微调、多模态统一 API 和企业级 SLA。对于有定制化、合规、成本控制需求的企业，LUMINA 是真正的基础设施层选择。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">数据安全和隐私如何保障？<span class="faq-arrow">+</span></div>
+        <div class="faq-a">所有数据传输均使用 TLS 1.3 加密，推理过程不会存储用户数据，通过 SOC2 Type II 认证。企业版支持完全私有化部署，数据物理隔离，满足金融、医疗等强合规场景。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">接入需要多少技术成本？<span class="faq-arrow">+</span></div>
+        <div class="faq-a">标准 REST API，5 分钟即可完成接入。我们提供 Python、Node.js、Go、Java 等主流语言 SDK，以及 LangChain、LlamaIndex 等主流框架的原生集成。现有系统无需大幅改造。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">如何计费？有没有隐藏费用？<span class="faq-arrow">+</span></div>
+        <div class="faq-a">按 Token 用量计费，价格透明，官网实时可查。入门版永久免费，专业版每月固定费率含 10 亿 Token，超出部分按量计费。没有任何隐藏费用，账单精确到每一个 Token。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">支持哪些模型？能用自己的模型吗？<span class="faq-arrow">+</span></div>
+        <div class="faq-a">支持 200+ 主流开源模型（LLaMA、Mistral、Qwen、Gemma 等），同时支持上传私有模型或通过 Fine-tune 平台定制专属模型，部署与调用完全自主可控。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<div class="cta-final">
+  <h2 class="r">开始构建，<br/>从今天起。</h2>
+  <p class="r d1">免费注册，5 分钟接入，无需信用卡。<br/>30 天不满意，全额退款，没有任何问题。</p>
+  <div class="cta-btns r d2">
+    <a href="#" class="ha-primary" style="font-size:17px;padding:16px 36px">免费开始使用</a>
+    <a href="#" class="ha-ghost" style="font-size:17px;padding:16px 32px">预约产品演示</a>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="ft">
+    <div class="ft-grid">
+      <div class="ft-about">
+        <div class="fa-logo">
+          <div class="fa-mark">L</div>
+          <span class="fa-name">LUMINA AI</span>
+        </div>
+        <p>新一代 AI 基础设施，让每家公司都拥有 AI 超能力。</p>
+        <div class="ft-social">
+          <a href="#" class="ft-s">𝕏</a>
+          <a href="#" class="ft-s">⬡</a>
+          <a href="#" class="ft-s">in</a>
+          <a href="#" class="ft-s">▶</a>
+        </div>
+      </div>
+      <div class="ft-col">
+        <h5>产品</h5>
+        <ul>
+          <li><a href="#">LUMINA Core</a></li>
+          <li><a href="#">LUMINA Vision</a></li>
+          <li><a href="#">LUMINA Voice</a></li>
+          <li><a href="#">LUMINA Guard</a></li>
+          <li><a href="#">LUMINA Studio</a></li>
+          <li><a href="#">LUMINA Deploy</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h5>开发者</h5>
+        <ul>
+          <li><a href="#">API 文档</a></li>
+          <li><a href="#">SDK 下载</a></li>
+          <li><a href="#">模型库</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">社区论坛</a></li>
+          <li><a href="#">更新日志</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h5>公司</h5>
+        <ul>
+          <li><a href="#">关于我们</a></li>
+          <li><a href="#">技术博客</a></li>
+          <li><a href="#">招聘</a></li>
+          <li><a href="#">新闻中心</a></li>
+          <li><a href="#">合作伙伴</a></li>
+          <li><a href="#">联系我们</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h5>法律</h5>
+        <ul>
+          <li><a href="#">隐私政策</a></li>
+          <li><a href="#">服务条款</a></li>
+          <li><a href="#">SLA 协议</a></li>
+          <li><a href="#">安全合规</a></li>
+          <li><a href="#">Cookie 设置</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <span>© 2026 LUMINA AI Technologies, Inc. 保留所有权利。</span>
+      <div style="display:flex;gap:16px">
+        <a href="#">沪ICP备2026000001号</a>
+        <a href="#">隐私</a>
+        <a href="#">条款</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── REVEAL ──
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); } });
+}, { threshold: 0.06 });
+document.querySelectorAll('.r').forEach(el => io.observe(el));
+
+// ── NAV SCROLL ──
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').style.background =
+    scrollY > 20 ? 'rgba(0,0,0,.92)' : 'rgba(0,0,0,.65)';
+}, { passive: true });
+
+// ── USE CASE TABS ──
+document.querySelectorAll('.c-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.c-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.c-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+  });
+});
+
+// ── PRICING TOGGLE ──
+const sw = document.getElementById('pswitch');
+const vals = document.querySelectorAll('.price-val');
+sw.addEventListener('click', () => {
+  sw.classList.toggle('on');
+  const isAnnual = sw.classList.contains('on');
+  vals.forEach(v => { v.textContent = isAnnual ? '2,399' : '2,999'; });
+});
+
+// ── FAQ ACCORDION ──
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>
